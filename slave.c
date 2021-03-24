@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#define MAX_SIZE 200
+
 static void processFile(char * file);
 
 int main(int argc, char const *argv[])
@@ -15,6 +17,15 @@ int main(int argc, char const *argv[])
 }
 
 static void processFile(char * file){
-    //printf("Entre al slaveeee / Process file\n");
-    minisat(*file);
+    char buffer[MAX_SIZE];
+    sprintf(buffer, "%s %s | grep -o -e \"Number of.*[0 - 9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"",minisat,file);
+
+    FILE *output;
+    
+    output=popen(buffer,"r");
+
+    int dim=fread(buffer,sizeof(char),MAX_SIZE,output);
+
+    buffer[dim]=0;
+
 }
