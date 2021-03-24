@@ -1,6 +1,10 @@
-//gcc -Wall -pedantic -std=c99 slave.c -o slave
+//gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
+#define _POSIX_C_SOURCE 2
+#define _GNU_SOURCE
 
 #include <stdio.h>
+#include <unistd.h>
+
 
 #define MAX_SIZE 200
 
@@ -18,14 +22,17 @@ int main(int argc, char const *argv[])
 
 static void processFile(char * file){
     char buffer[MAX_SIZE];
-    sprintf(buffer, "%s %s | grep -o -e \"Number of.*[0 - 9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"",minisat,file);
+    sprintf(buffer, "%s %s | grep -o -e \"Number of.*[0 - 9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"","minisat",file);
 
     FILE *output;
     
-    output=popen(buffer,"r");
+    output = popen(buffer,"r");
 
     int dim=fread(buffer,sizeof(char),MAX_SIZE,output);
 
     buffer[dim]=0;
+
+    printf("File: %s\nPID: %d\n%s\n\n",file,getpid(),buffer);
+    pclose(output);
 
 }
