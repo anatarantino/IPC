@@ -10,7 +10,19 @@
 #include <time.h>
 #include <unistd.h>
 #include <semaphore.h>
+
 #define ARGUM 6
+#define CANT_SONS 8
+
+typedef struct{
+    pid_t pid;
+    int input;
+    int output;
+    int tasks_done;
+}struct_slave;
+
+static void initSlaves(struct_slave *slaves, int files_per_son, int *total_files, char *argv[], int *cant_sons, int *file_count);
+
 
 int main(int argc, char const *argv[])
 {
@@ -19,52 +31,85 @@ int main(int argc, char const *argv[])
         fprintf(stderr,"no hay archivos\n");
         exit(-1);
     }
-    int cant_sons=8;
+    int cant_sons=CANT_SONS;
     int files_per_son=5;
     //int cant_sons=abs(total_files*0.05) + 1; //sumo 1 por si la cant de archivos es menor a 20 // SON 4 !!
     //int files_per_son=abs(total_files*0.02) + 1; //sumo 1 por si la cant de archivos es menor a 50 // SON 2!!
-    int random;
-    char* buffer[total_files][ARGUM];
+    //char* buffer[total_files][ARGUM];
     int file_count=1;
     int index=0;
 
-    char * shmem = shmopen();
-    char * mmap = mmap();
+//    char * shmem = shmopen();
+//    char * mmap = mmap();
     
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
-    
 
+    struct_slave slaves[CANT_SONS];
+    initSlaves(slaves, files_per_son, &total_files, (char**)(argv+1), &cant_sons, &file_count);
+/*
+    int childPID, exitStatus;
+    while ((childPID = wait(&exitStatus)) > 0 && total_files>0) {//son finishes
+    //    buffer[index][0]=index; //reemplazar index por valor de retorno de hijo
+        index++;
+        total_files--;
+    }
+    */
 
+    return 0;
+}
 
+static void initSlaves(struct_slave slaves[CANT_SONS], int files_per_son, int *total_files, char *argv[], int *cant_sons, int *file_count){
+    int sonMaster[2],masterSon[2];
+    pid_t pid;
 
-    for(int i=0; i< cant_sons && total_files>0; i++){
-        //printf("entre al for\n");
-
-        if(fork()==0){
-            //printf("Hola soy un hijo\n");
+    for(int i=0; i< *cant_sons; i++){
+        slaves[i].tasks_done=0;
+        if(pipe(sonMaster)< 0) {
+            printf("Error creating pipe\n");
+            exit(1);
+        }
+        if(pipe(masterSon)< 0) {
+            printf("Error creating pipe\n");
+            exit(1);
+        }
+        if((pid=fork())==0){   
+            if(dup2(sonMaster[1],0)<0){ //0 donde escribe el hijo eso quiero que vaya a la parte de escritura del pipe que es [1]
+               // read en sonMaster[0] va a leer hola (el padre)
+               printf("Error dupping pipe\n");
+                exit(1);
+            }
+            close(sonMaster[0]);
+            if(dup2(masterSon[0],1)<0){ //el hijo lee lo que le manda el padre
+                printf("Error dupping pipe\n");
+                exit(1);
+            }
+            close(masterSon[1]);
             char * args[files_per_son + 2]; 
             int j=0;
             args[j++] = "slave";
             while(j<files_per_son+1){
-                printf("----\nArchivo: %d-----\n",file_count);
+              //  printf("----\nArchivo: %d-----\n",file_count);
                 //printf("execv\n");
-                args[j] = argv[file_count++];
+                args[j] = argv[(*file_count)++];
                 j++;
             }
             args[j] = NULL;
             if(execv(args[0], args) < 0){
-                    exit(-1);
+                exit(-1);
             }
-            total_files-=files_per_son;
         }
-    }
 
-    int childPID, exitStatus;
-    while ((childPID = wait(&exitStatus)) > 0 && total_files>0) {//son finishes
-        buffer[index][0]=index; //reemplazar index por valor de retorno de hijo
-        index++;
-        total_files--;
-    }
+        slaves[i].input=masterSon[1];
+        slaves[i].output=sonMaster[0];
+            //agregar las entradas que le enteresan al padre
+            //osea los que no use aca
+        slaves[i].tasks_done+=files_per_son;
+        slaves[i].pid=pid;
+        *total_files-=files_per_son;
+        *file_count+=files_per_son;
 
-    return 0;
-}
+        close(masterSon[0]);
+        close(sonMaster[1]);
+
+    }
+} 
