@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 
-#define MAX_SIZE 200
+#define MAX_SIZE 4096
 
 static void processFile(char * file);
 

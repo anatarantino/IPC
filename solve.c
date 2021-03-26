@@ -7,12 +7,14 @@
 #include <sys/wait.h>
 #include <sys/shm.h>
 #include <sys/mman.h>
+#include <sys/select.h>
 #include <time.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <errno.h>
 
-#define MAX_INPUT_SIZE 400
+#define _POSIX_C_SOURCE 200112L
+#define MAX_SIZE 40
 #define ARGUM 6
 #define CANT_CHILD 8
 #define ERROR_HANDLER(message)  \
@@ -26,11 +28,11 @@ typedef struct{
     pid_t pid;
     int input;
     int output;
-    int tasks_done;
+    int pending_done;
 }struct_slave;
 
 static void initChildren(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count);
-static void assignTask(int * tasks_done, int fd_input,char * files_array[], int * total_files);
+static void assignTask(int * pending_done, int fd_input,char * files_array[], int * total_files);
 
 int main(int argc, char const *argv[])
 {
@@ -43,9 +45,10 @@ int main(int argc, char const *argv[])
     int files_per_child=5;
     //int cant_child=abs(total_files*0.05) + 1; //sumo 1 por si la cant de archivos es menor a 20 // child 4 !!
     //int files_per_child=abs(total_files*0.02) + 1; //sumo 1 por si la cant de archivos es menor a 50 // child 2!!
-    //char* buffer[total_files][ARGUM];
+    char buffer[MAX_SIZE];
     int file_count=1;
     int index=0;
+    int read_count;
 
 //    char * shmem = shmopen();
 //    char * mmap = mmap();
@@ -61,7 +64,6 @@ int main(int argc, char const *argv[])
 
         for(int i=0 ; i<cant_child ; i++) {
             FD_SET(slaves[i].output,&read_fds);
-            assignTask(&(slaves[i].tasks_done),slaves[i].input,argv+file_count,&total_files);
             if(slaves[i].output > max_fd_read){
                 max_fd_read = slaves[i].output;
             }
@@ -69,13 +71,23 @@ int main(int argc, char const *argv[])
 
         int cant_fd = select(max_fd_read+1, &read_fds,NULL,NULL,NULL); //solo importan los fd de lectura
         if(cant_fd == -1){
-            //error
+            ERROR_HANDLER("");
         }
 
         for(int i=0 ; i<cant_child ; i++) {
             int fd_read = slaves[i].output;
-            if(FD_ISSET(slaves[i].output,&read_fds)){
-                sendInfo();
+            if(FD_ISSET(fd_read,&read_fds)){
+                if((read_count=read(fd_read,buffer,MAX_SIZE))==-1){
+                    ERROR_HANDLER("");   
+                }
+                printf("%s",buffer);
+
+
+           //     sendInfo();
+           //     if()
+                //read leer lo que esta en el file descriptor e imprimir (ir al proceso vista)
+                //le queda alguna tarea? entonces le mando una mas
+                //si no le quedan mas tareas para procesar -> assignTask(&(slaves[i].pending_done),slaves[i].input,argv+file_count,&total_files);                
             }
         }
         
@@ -90,7 +102,7 @@ static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, i
     pid_t pid;
 
     for(int i=0; i< *cant_child; i++){
-        slaves[i].tasks_done=0;
+        slaves[i].pending_done=0;
         if(pipe(childMaster)< 0) {
             printf("Error creating pipe\n");
             exit(1);
@@ -130,7 +142,7 @@ static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, i
         slaves[i].output=childMaster[0];
             //agregar las entradas que le enteresan al padre
             //osea los que no use aca
-        slaves[i].tasks_done+=files_per_child;
+        slaves[i].pending_done+=files_per_child;
         slaves[i].pid=pid;
         *total_files-=files_per_child;
         *file_count+=files_per_child;
@@ -141,14 +153,14 @@ static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, i
     }
 } 
 
-static void assignTask(int * tasks_done, int fd_input,char * files_array[], int * total_files){
+static void assignTask(int * pending_done, int fd_input,char * files_array[], int * total_files){
 
-    char buffer[MAX_INPUT_SIZE];
+    char buffer[MAX_SIZE];
     
     sprintf(buffer,"%s\n",files_array[0]);
     
     write(fd_input,buffer,strlen(buffer));
-    (*tasks_done)++;
+    (*pending_done)++;
     (*total_files)--;
 }
 
