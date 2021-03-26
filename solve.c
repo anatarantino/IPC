@@ -1,5 +1,7 @@
 //gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
 
+#define _SVID_SOURCE 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -75,11 +77,15 @@ int main(int argc, char const *argv[])
         }
 
         for(int i=0 ; i<cant_child ; i++) {
+
             int fd_read = slaves[i].output;
             if(FD_ISSET(fd_read,&read_fds)){
                 if((read_count=read(fd_read,buffer,MAX_SIZE))==-1){
                     ERROR_HANDLER("");   
                 }
+                }
+                buffer[read_count]=0;
+                buffer[read_count]=0;
                 printf("%s",buffer);
 
 
@@ -91,8 +97,7 @@ int main(int argc, char const *argv[])
             }
         }
         
-
-    }
+    
 
     return 0;
 }

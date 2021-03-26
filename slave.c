@@ -1,4 +1,5 @@
 //gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
+
 #define _POSIX_C_SOURCE 2
 #define _GNU_SOURCE
 
