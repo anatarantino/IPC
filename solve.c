@@ -15,12 +15,12 @@
 #define MAX_INPUT_SIZE 400
 #define ARGUM 6
 #define CANT_CHILD 8
-#define ERROR_HANDLER(message)
-    do{
-        perror(message);
-        exit(EXIT_FAILURE);
-    }
-    while(0);
+#define ERROR_HANDLER(message)  \
+    do{                         \
+        perror(message);        \
+        exit(EXIT_FAILURE);     \
+    }                           \
+    while(0)                    \
 
 typedef struct{
     pid_t pid;
@@ -29,9 +29,8 @@ typedef struct{
     int tasks_done;
 }struct_slave;
 
-static void initSlaves(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count);
-static int assignTask(int fd_input,char * files_array[],int cant_files);
-static int min(int a, int b);
+static void initChildren(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count);
+static void assignTask(int * tasks_done, int fd_input,char * files_array[], int * total_files);
 
 int main(int argc, char const *argv[])
 {
@@ -54,20 +53,39 @@ int main(int argc, char const *argv[])
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
 
     struct_slave slaves[CANT_CHILD];
-    initSlaves(slaves, files_per_child, &total_files, (char**)(argv+1), &cant_child, &file_count);
-
+    initChildren(slaves, files_per_child, &total_files, (char**)(argv+1), &cant_child, &file_count);
+    fd_set read_fds;
+    int max_fd_read=-1;
     while(total_files > 0){
-        for(int i=0 ; i<cant_child ; i++) {
-            
-            slaves[i].tasks_done += (slaves[i].input,argv+file_count,min(files_per_child,total_files-file_count));
+        FD_ZERO(&read_fds);
 
+        for(int i=0 ; i<cant_child ; i++) {
+            FD_SET(slaves[i].output,&read_fds);
+            assignTask(&(slaves[i].tasks_done),slaves[i].input,argv+file_count,&total_files);
+            if(slaves[i].output > max_fd_read){
+                max_fd_read = slaves[i].output;
+            }
         }
+
+        int cant_fd = select(max_fd_read+1, &read_fds,NULL,NULL,NULL); //solo importan los fd de lectura
+        if(cant_fd == -1){
+            //error
+        }
+
+        for(int i=0 ; i<cant_child ; i++) {
+            int fd_read = slaves[i].output;
+            if(FD_ISSET(slaves[i].output,&read_fds)){
+                sendInfo();
+            }
+        }
+        
+
     }
 
     return 0;
 }
 
-static void initSlaves(struct_slave slaves[CANT_CHILD], int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count){
+static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count){
     int childMaster[2],masterChild[2];
     pid_t pid;
 
@@ -123,19 +141,17 @@ static void initSlaves(struct_slave slaves[CANT_CHILD], int files_per_child, int
     }
 } 
 
-static int assignTask(int fd_input,char * files_array[],int cant_files){
+static void assignTask(int * tasks_done, int fd_input,char * files_array[], int * total_files){
 
     char buffer[MAX_INPUT_SIZE];
-    for(int i=0 ; i<cant_files ; i++){
-        sprintf(buffer,"%s\n",files_array[i]);
-    }
+    
+    sprintf(buffer,"%s\n",files_array[0]);
+    
     write(fd_input,buffer,strlen(buffer));
-    return cant_files;
+    (*tasks_done)++;
+    (*total_files)--;
 }
 
-static int min(int a, int b){
-    if(a<=b){
-        return a;
-    }
-    return b;
+static void sendInfo(){
+    
 }
