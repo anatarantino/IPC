@@ -10,11 +10,17 @@
 #include <time.h>
 #include <unistd.h>
 #include <semaphore.h>
-
+#include <errno.h>
 
 #define MAX_INPUT_SIZE 400
 #define ARGUM 6
-#define CANT_SONS 8
+#define CANT_CHILD 8
+#define ERROR_HANDLER(message)
+    do{
+        perror(message);
+        exit(EXIT_FAILURE);
+    }
+    while(0);
 
 typedef struct{
     pid_t pid;
@@ -23,7 +29,7 @@ typedef struct{
     int tasks_done;
 }struct_slave;
 
-static void initSlaves(struct_slave *slaves, int files_per_son, int *total_files, char *argv[], int *cant_sons, int *file_count);
+static void initSlaves(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count);
 static int assignTask(int fd_input,char * files_array[],int cant_files);
 static int min(int a, int b);
 
@@ -34,10 +40,10 @@ int main(int argc, char const *argv[])
         fprintf(stderr,"no hay archivos\n");
         exit(-1);
     }
-    int cant_sons=CANT_SONS;
-    int files_per_son=5;
-    //int cant_sons=abs(total_files*0.05) + 1; //sumo 1 por si la cant de archivos es menor a 20 // SON 4 !!
-    //int files_per_son=abs(total_files*0.02) + 1; //sumo 1 por si la cant de archivos es menor a 50 // SON 2!!
+    int cant_child=CANT_CHILD;
+    int files_per_child=5;
+    //int cant_child=abs(total_files*0.05) + 1; //sumo 1 por si la cant de archivos es menor a 20 // child 4 !!
+    //int files_per_child=abs(total_files*0.02) + 1; //sumo 1 por si la cant de archivos es menor a 50 // child 2!!
     //char* buffer[total_files][ARGUM];
     int file_count=1;
     int index=0;
@@ -47,13 +53,13 @@ int main(int argc, char const *argv[])
     
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
 
-    struct_slave slaves[CANT_SONS];
-    initSlaves(slaves, files_per_son, &total_files, (char**)(argv+1), &cant_sons, &file_count);
+    struct_slave slaves[CANT_CHILD];
+    initSlaves(slaves, files_per_child, &total_files, (char**)(argv+1), &cant_child, &file_count);
 
     while(total_files > 0){
-        for(int i=0 ; i<cant_sons ; i++) {
+        for(int i=0 ; i<cant_child ; i++) {
             
-            slaves[i].tasks_done += (slaves[i].input,argv+file_count,min(files_per_son,total_files-file_count));
+            slaves[i].tasks_done += (slaves[i].input,argv+file_count,min(files_per_child,total_files-file_count));
 
         }
     }
@@ -61,36 +67,36 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-static void initSlaves(struct_slave slaves[CANT_SONS], int files_per_son, int *total_files, char *argv[], int *cant_sons, int *file_count){
-    int sonMaster[2],masterSon[2];
+static void initSlaves(struct_slave slaves[CANT_CHILD], int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count){
+    int childMaster[2],masterChild[2];
     pid_t pid;
 
-    for(int i=0; i< *cant_sons; i++){
+    for(int i=0; i< *cant_child; i++){
         slaves[i].tasks_done=0;
-        if(pipe(sonMaster)< 0) {
+        if(pipe(childMaster)< 0) {
             printf("Error creating pipe\n");
             exit(1);
         }
-        if(pipe(masterSon)< 0) {
+        if(pipe(masterChild)< 0) {
             printf("Error creating pipe\n");
             exit(1);
         }
         if((pid=fork())==0){   
-            if(dup2(sonMaster[1],0)<0){ //0 donde escribe el hijo eso quiero que vaya a la parte de escritura del pipe que es [1]
-               // read en sonMaster[0] va a leer hola (el padre)
+            if(dup2(childMaster[1],0)<0){ //0 donde escribe el hijo eso quiero que vaya a la parte de escritura del pipe que es [1]
+               // read en childMaster[0] va a leer hola (el padre)
                printf("Error dupping pipe\n");
                 exit(1);
             }
-            close(sonMaster[0]);
-            if(dup2(masterSon[0],1)<0){ //el hijo lee lo que le manda el padre
+            close(childMaster[0]);
+            if(dup2(masterChild[0],1)<0){ //el hijo lee lo que le manda el padre
                 printf("Error dupping pipe\n");
                 exit(1);
             }
-            close(masterSon[1]);
-            char * args[files_per_son + 2]; 
+            close(masterChild[1]);
+            char * args[files_per_child + 2]; 
             int j=0;
             args[j++] = "slave";
-            while(j<files_per_son+1){
+            while(j<files_per_child+1){
               //  printf("----\nArchivo: %d-----\n",file_count);
                 //printf("execv\n");
                 args[j] = argv[(*file_count)++];
@@ -102,17 +108,17 @@ static void initSlaves(struct_slave slaves[CANT_SONS], int files_per_son, int *t
             }
         }
 
-        slaves[i].input=masterSon[1];
-        slaves[i].output=sonMaster[0];
+        slaves[i].input=masterChild[1];
+        slaves[i].output=childMaster[0];
             //agregar las entradas que le enteresan al padre
             //osea los que no use aca
-        slaves[i].tasks_done+=files_per_son;
+        slaves[i].tasks_done+=files_per_child;
         slaves[i].pid=pid;
-        *total_files-=files_per_son;
-        *file_count+=files_per_son;
+        *total_files-=files_per_child;
+        *file_count+=files_per_child;
 
-        close(masterSon[0]);
-        close(sonMaster[1]);
+        close(masterChild[0]);
+        close(childMaster[1]);
 
     }
 } 
