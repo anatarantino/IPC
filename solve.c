@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <semaphore.h>
 
+
+#define MAX_INPUT_SIZE 400
 #define ARGUM 6
 #define CANT_SONS 8
 
@@ -22,7 +24,8 @@ typedef struct{
 }struct_slave;
 
 static void initSlaves(struct_slave *slaves, int files_per_son, int *total_files, char *argv[], int *cant_sons, int *file_count);
-
+static int assignTask(int fd_input,char * files_array[],int cant_files);
+static int min(int a, int b);
 
 int main(int argc, char const *argv[])
 {
@@ -46,14 +49,14 @@ int main(int argc, char const *argv[])
 
     struct_slave slaves[CANT_SONS];
     initSlaves(slaves, files_per_son, &total_files, (char**)(argv+1), &cant_sons, &file_count);
-/*
-    int childPID, exitStatus;
-    while ((childPID = wait(&exitStatus)) > 0 && total_files>0) {//son finishes
-    //    buffer[index][0]=index; //reemplazar index por valor de retorno de hijo
-        index++;
-        total_files--;
+
+    while(total_files > 0){
+        for(int i=0 ; i<cant_sons ; i++) {
+            
+            slaves[i].tasks_done += (slaves[i].input,argv+file_count,min(files_per_son,total_files-file_count));
+
+        }
     }
-    */
 
     return 0;
 }
@@ -113,3 +116,20 @@ static void initSlaves(struct_slave slaves[CANT_SONS], int files_per_son, int *t
 
     }
 } 
+
+static int assignTask(int fd_input,char * files_array[],int cant_files){
+
+    char buffer[MAX_INPUT_SIZE];
+    for(int i=0 ; i<cant_files ; i++){
+        sprintf(buffer,"%s\n",files_array[i]);
+    }
+    write(fd_input,buffer,strlen(buffer));
+    return cant_files;
+}
+
+static int min(int a, int b){
+    if(a<=b){
+        return a;
+    }
+    return b;
+}
