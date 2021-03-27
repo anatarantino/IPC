@@ -5,9 +5,15 @@
 
 #include <stdio.h>
 #include <unistd.h>
-
+#include <stdlib.h>
 
 #define MAX_SIZE 4096
+#define ERROR_HANDLER(message)  \
+    do{                         \
+        perror(message);        \
+        exit(EXIT_FAILURE);     \
+    }                           \
+    while(0)                    \
 
 static void processFile(char * file);
 
@@ -23,17 +29,24 @@ int main(int argc, char const *argv[])
 
 static void processFile(char * file){
     char buffer[MAX_SIZE];
-    sprintf(buffer, "%s %s | grep -o -e \"Number of.*[0 - 9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"","minisat",file);
+    if(sprintf(buffer, "%s %s | grep -o -e \"Number of.*[0 - 9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"","minisat",file)<0){
+        ERROR_HANDLER("Error in function sprintf\n");
+    }
 
     FILE *output;
     
-    output = popen(buffer,"r");
+    if((output = popen(buffer,"r"))==NULL){
+        ERROR_HANDLER("Error in function popen\n");
+    }
 
     int dim=fread(buffer,sizeof(char),MAX_SIZE,output);
 
     buffer[dim]=0;
 
     printf("File: %s\nPID: %d\n%s\n\n",file,getpid(),buffer);
-    pclose(output);
+
+    if(pclose(output)==-1){
+        ERROR_HANDLER("Error in function pclose\n");
+    }
 
 }
