@@ -23,6 +23,7 @@
 #define STDIN 0
 #define STDOUT 1
 #define CANT_CHILD 8
+#define FILES_PER_CHILD 5
 #define ERROR_HANDLER(message)  \
     do{                         \
         perror(message);        \
@@ -37,7 +38,7 @@ typedef struct{
     int pending_task;
 }struct_slave;
 
-static void initChildren(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count);
+static void initChildren(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count);
 static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files);
 
 int main(int argc, char const *argv[])
@@ -50,9 +51,8 @@ int main(int argc, char const *argv[])
     }
     //int cant_child=CANT_CHILD;
     //int files_per_child=5;
-    int cant_child=abs(total_files*0.05) + 1; //sumo 1 por si la cant de archivos es menor a 20 // child 4 !!
-    printf("ACAAAAAAAAAAAAAAAAAAAAAAAA = %d\n\n\n\n",cant_child);
-    int files_per_child=abs(total_files*0.02) + 1; //sumo 1 por si la cant de archivos es menor a 50 // child 2!!
+//    int cant_child=abs(total_files*0.05) + 1; //sumo 1 por si la cant de archivos es menor a 20 // child 4 !!
+//    int files_per_child=abs(total_files*0.02) + 1; //sumo 1 por si la cant de archivos es menor a 50 // child 2!!
     char buffer[MAX_SIZE+1];
     int file_count=1;
     int read_count;
@@ -63,14 +63,15 @@ int main(int argc, char const *argv[])
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
 
     struct_slave slaves[CANT_CHILD];
-    initChildren(slaves, files_per_child, &total_files, (char**)(argv+1), &cant_child, &file_count);
+    initChildren(slaves, FILES_PER_CHILD, &total_files, (char**)(argv+1), CANT_CHILD, &file_count);
+ /*
+ 
     fd_set read_fds;
     int max_fd_read=-1;
-    
     while(total_files > 0){
         FD_ZERO(&read_fds);
 
-        for(int i=0 ; i<cant_child ; i++) {
+        for(int i=0 ; i<CANT_CHILD ; i++) {
             FD_SET(slaves[i].output,&read_fds);
             if(slaves[i].output > max_fd_read){
                 max_fd_read = slaves[i].output;
@@ -82,8 +83,8 @@ int main(int argc, char const *argv[])
             ERROR_HANDLER("Error in select function\n");
         }
 
-        for(int i=0 ; i<cant_child ; i++) {
-
+        for(int i=0 ; i<CANT_CHILD ; i++) {
+                
             if(FD_ISSET(slaves[i].output,&read_fds)){
                 if((read_count=read(slaves[i].output,buffer,MAX_SIZE))==-1){
                     ERROR_HANDLER("Error in read function\n");   
@@ -109,15 +110,17 @@ int main(int argc, char const *argv[])
             }
             }
         }
+
+        */
+    
     return 0;
 }
 
-static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, int *total_files, char *argv[], int *cant_child, int *file_count){
+static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count){
     int childMaster[2],masterChild[2];
     pid_t pid;
 
-    for(int i=0; i< *cant_child; i++){
-        printf("CANT CHILD %d\n",*cant_child);
+    for(int i=0; i< cant_child; i++){
         slaves[i].pending_task=0;
         if(pipe(childMaster)==-1) {
             ERROR_HANDLER("Error creating pipe\n");
@@ -139,26 +142,28 @@ static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, i
             if(close(masterChild[WRITE])==-1){
                 ERROR_HANDLER("Error closing file descriptor");
             }
-/*
+
             if(close(masterChild[READ])==-1){
                 ERROR_HANDLER("Error closing file descriptor");
             }
             if(close(childMaster[WRITE])==-1){
                 ERROR_HANDLER("Error closing file descriptor");
             }
-*/
+
             char * args[files_per_child + 2]; 
             int j=0;
             args[j++] = "slave";
-            while(j<files_per_child+1){
+            for(j=1 ; j<files_per_child + 1; j++){
               //  printf("----\nArchivo: %d-----\n",file_count);
                 args[j] = argv[(*file_count)++];
-                j++;
+            
             }
             args[j] = NULL;
+        
             if(execv(args[0], args)==-1){
                 ERROR_HANDLER("Error in execv function");
             }
+        
         }else if(pid==-1){
             ERROR_HANDLER("Error creating a child\n");
         }
@@ -172,7 +177,6 @@ static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, i
         *total_files-=files_per_child;
         *file_count+=files_per_child;
 
-        printf("PENDING %d",slaves[i].pending_task);
         if(close(masterChild[READ])==-1){
             ERROR_HANDLER("Error closing file descriptor");
         }

@@ -29,7 +29,7 @@ int main(int argc, char const *argv[])
         //printf("Estoy en el for del main del slave\n");
         processFile((char *)argv[i]);
     }
-    
+
     return 0;
 }
 
