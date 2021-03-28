@@ -22,7 +22,7 @@ int main(int argc, char const *argv[])
     //printf("Estoy en el slave\n");
 
     if (setvbuf(stdout, NULL, _IONBF, 0) != 0){
-        ERROR_HANDLER("slave");
+        ERROR_HANDLER("Error in function setvbuf");
     }
 
     for(size_t i=1 ; i<argc ; i++){     //arranca en 1 por el nombre del programa en argv
