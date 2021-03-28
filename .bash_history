@@ -121,3 +121,12 @@ cd root/
 ls
 gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
 ./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+cd root/
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/
+./solve CBS_k3_n100_m403_b10/*
+cd ro
+cd root/
+ls
+./solve CBS_k3_n100_m403_b10_3.cnf 

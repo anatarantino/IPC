@@ -20,10 +20,16 @@ static void processFile(char * file);
 int main(int argc, char const *argv[])
 {
     //printf("Estoy en el slave\n");
+
+    if (setvbuf(stdout, NULL, _IONBF, 0) != 0){
+        ERROR_HANDLER("slave");
+    }
+
     for(size_t i=1 ; i<argc ; i++){     //arranca en 1 por el nombre del programa en argv
         //printf("Estoy en el for del main del slave\n");
         processFile((char *)argv[i]);
     }
+    
     return 0;
 }
 
@@ -43,8 +49,8 @@ static void processFile(char * file){
 
     buffer[dim]=0;
 
-    printf("File: %s\nPID: %d\n%s\n\n",file,getpid(),buffer);
-
+    printf("File: %s\nPID: %d\n%s\n\n\t",file,getpid(),buffer); //para no usar el \n
+    //dprintf(2,"File: %s\nPID: %d\n%s\n\n%c",file,getpid(),buffer,7); //para no usar el \n
     if(pclose(output)==-1){
         ERROR_HANDLER("Error in function pclose\n");
     }
