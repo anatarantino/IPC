@@ -28,21 +28,19 @@ int main(int argc, char const *argv[])
         processFile((char *)argv[i]);
     }
     
+    
+
     char file[MAX_SIZE + 1]={0};
     ssize_t count;
-    
-    while((count = read(STDIN_FILENO, file, MAX_SIZE)) != -1){ 
-        file[count]=0;
+    while((count = read(STDIN_FILENO, file, MAX_SIZE)) != 0){ 
+        if (count == -1){
+            ERROR_HANDLER("Error in function read");
+        }
+
+        file[count-1]=0; 
         processFile(file);
     }
-
-    if (count == -1){
-        ERROR_HANDLER("Error in function read");
-    }
     
-    
-
-
     return 0;
 }
 

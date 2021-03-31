@@ -39,7 +39,7 @@ typedef struct{
 }struct_slave;
 
 static void initChildren(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count);
-static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files);
+static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files, int * file_count);
 
 int main(int argc, char const *argv[])
 {
@@ -63,7 +63,10 @@ int main(int argc, char const *argv[])
 
     struct_slave slaves[CANT_CHILD];
     initChildren(slaves, FILES_PER_CHILD, &total_files, (char**)(argv+1), CANT_CHILD, &file_count);
- 
+    
+    int counter =0;
+
+
     fd_set read_fds;
     int max_fd_read=-1;
     while(total_files > 0){
@@ -81,7 +84,7 @@ int main(int argc, char const *argv[])
             ERROR_HANDLER("Error in select function\n");
         }
 
-        for(int i=0 ; i<CANT_CHILD ; i++) {
+        for(int i=0 ; i<CANT_CHILD; i++) {
                 
             if(FD_ISSET(slaves[i].output,&read_fds)){ 
                 if((read_count=read(slaves[i].output,buffer,MAX_SIZE))==-1){
@@ -98,19 +101,21 @@ int main(int argc, char const *argv[])
                 //sendInfo();
 
                 if(slaves[i].pending_task<=0){
-                    assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);     
+                    assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files,&file_count); 
+                      
                 }
-                //printf(buffer);
-
+                printf(buffer);
+                counter++;
                 //read leer lo que esta en el file descriptor e imprimir (ir al proceso vista)
                 //le queda alguna tarea? entonces le mando una mas
                 //si no le quedan mas tareas para procesar -> assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);                
             }
         }
+        
     }
 
         
-    
+    printf("\n\n\n\nCANTIDAD DE ARCHIVOSSSS %d\n", counter);
     return 0;
 }
 
@@ -185,7 +190,7 @@ static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, i
     }
 } 
 
-static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files){
+static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files, int * file_count){
     char buffer[MAX_SIZE];
     
     if(sprintf(buffer,"%s\n",files_array[0])<0){
@@ -197,6 +202,7 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
     }
     (*pending_task)++;
     (*total_files)--;
+    (*file_count)++;
 }
 
 /*
