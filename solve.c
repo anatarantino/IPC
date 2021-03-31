@@ -10,6 +10,8 @@
 #include <sys/wait.h>
 #include <sys/shm.h>
 #include <sys/mman.h>
+#include <sys/stat.h>        /* For mode constants */
+//#include <fcntl.h>           /* For O_* constants */
 #include <sys/select.h>
 #include <time.h>
 #include <unistd.h>
@@ -63,12 +65,11 @@ int main(int argc, char const *argv[])
 
     struct_slave slaves[CANT_CHILD];
     initChildren(slaves, FILES_PER_CHILD, &total_files, (char**)(argv+1), CANT_CHILD, &file_count);
-    
-    int counter =0;
 
 
     fd_set read_fds;
     int max_fd_read=-1;
+
     while(total_files > 0){
         FD_ZERO(&read_fds);
 
@@ -105,7 +106,6 @@ int main(int argc, char const *argv[])
                       
                 }
                 printf(buffer);
-                counter++;
                 //read leer lo que esta en el file descriptor e imprimir (ir al proceso vista)
                 //le queda alguna tarea? entonces le mando una mas
                 //si no le quedan mas tareas para procesar -> assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);                
@@ -115,7 +115,6 @@ int main(int argc, char const *argv[])
     }
 
         
-    printf("\n\n\n\nCANTIDAD DE ARCHIVOSSSS %d\n", counter);
     return 0;
 }
 
@@ -205,9 +204,17 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
     (*file_count)++;
 }
 
-/*
-static void sendInfo(){
-    
+
+static void sendInfo(const char *name, int oflag, mode_t mode){ // oflag --> O_RDWR     Open the object for read-write access.
+    int shm_fd = shm_open(name, oflag, mode); // name should be  identified by a name of the form /somename; /shm
+    if(shm_fd == -1){
+        ERROR_HANDLER("Error in function shm_open\n");
+    }
+    //mmap del shm_fd
+        //void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+        // prot PROT_READ  Pages may be read. PROT_WRITE Pages may be written.
+        //error -1
+    //close del shm_fd
 }
-*/
+
 
