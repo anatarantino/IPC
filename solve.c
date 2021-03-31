@@ -100,7 +100,7 @@ int main(int argc, char const *argv[])
                 if(slaves[i].pending_task<=0){
                     assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);     
                 }
-                printf(buffer);
+                //printf(buffer);
 
                 //read leer lo que esta en el file descriptor e imprimir (ir al proceso vista)
                 //le queda alguna tarea? entonces le mando una mas

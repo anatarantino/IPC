@@ -21,12 +21,24 @@ int main(int argc, char const *argv[])
 {
 
     if (setvbuf(stdout, NULL, _IONBF, 0) != 0){
-        ERROR_HANDLER("slave");
+        ERROR_HANDLER("Error in function setvbuf");
     }
 
     for(size_t i=1 ; i<argc ; i++){     //arranca en 1 por el nombre del programa en argv
         processFile((char *)argv[i]);
     }
+
+    char file[MAX_SIZE + 1];
+    ssize_t count;
+
+    while((count = read(STDIN_FILENO, file, MAX_SIZE)) != -1){ 
+        processFile(file);
+    }
+
+    if (count == -1){
+        ERROR_HANDLER("Error in function read");
+    }
+
 
     return 0;
 }
