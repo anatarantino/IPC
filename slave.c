@@ -27,17 +27,20 @@ int main(int argc, char const *argv[])
     for(size_t i=1 ; i<argc ; i++){     //arranca en 1 por el nombre del programa en argv
         processFile((char *)argv[i]);
     }
-
-    char file[MAX_SIZE + 1];
+    
+    char file[MAX_SIZE + 1]={0};
     ssize_t count;
-
+    
     while((count = read(STDIN_FILENO, file, MAX_SIZE)) != -1){ 
+        file[count]=0;
         processFile(file);
     }
 
     if (count == -1){
         ERROR_HANDLER("Error in function read");
     }
+    
+    
 
 
     return 0;
@@ -45,7 +48,8 @@ int main(int argc, char const *argv[])
 
 static void processFile(char * file){
     char buffer[MAX_SIZE];
-    if(sprintf(buffer, "%s %s | grep -o -e \"Number of.*[0 - 9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"","minisat",file)<0){
+    
+    if(sprintf(buffer, "minisat %s | grep -o -e \"Number of.*[0 - 9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"",file)<0){
         ERROR_HANDLER("Error in function sprintf\n");
     }
 

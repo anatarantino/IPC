@@ -326,3 +326,20 @@ gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
 ./solve CBS_k3_n100_m403_b10/* &
 ./solve CBS_k3_n100_m403_b10/* 
 ./solve CBS_k3_n100_m403_b10/* 
+cd root
+./solve CBS_k3_n100_m403_b10/* 
+apt-get install minisat
+./solve CBS_k3_n100_m403_b10/* 
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/* 
+man dup2
+man dup2
+man fd_set
+man dup2
+man read
+man STDIN_FILENO
+man STDIN_FILENO
+gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+exit
