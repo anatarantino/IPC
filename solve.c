@@ -51,8 +51,7 @@ int main(int argc, char const *argv[])
     }
     //int cant_child=CANT_CHILD;
     //int files_per_child=5;
-//    int cant_child=abs(total_files*0.05) + 1; //sumo 1 por si la cant de archivos es menor a 20 // child 4 !!
-//    int files_per_child=abs(total_files*0.02) + 1; //sumo 1 por si la cant de archivos es menor a 50 // child 2!!
+
     char buffer[MAX_SIZE+1];
     int file_count=1;
     int read_count;
@@ -64,7 +63,6 @@ int main(int argc, char const *argv[])
 
     struct_slave slaves[CANT_CHILD];
     initChildren(slaves, FILES_PER_CHILD, &total_files, (char**)(argv+1), CANT_CHILD, &file_count);
- /*
  
     fd_set read_fds;
     int max_fd_read=-1;
@@ -85,7 +83,7 @@ int main(int argc, char const *argv[])
 
         for(int i=0 ; i<CANT_CHILD ; i++) {
                 
-            if(FD_ISSET(slaves[i].output,&read_fds)){
+            if(FD_ISSET(slaves[i].output,&read_fds)){ 
                 if((read_count=read(slaves[i].output,buffer,MAX_SIZE))==-1){
                     ERROR_HANDLER("Error in read function\n");   
                 }
@@ -93,30 +91,30 @@ int main(int argc, char const *argv[])
                     buffer[read_count]=0;
                 }
             
-            for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){
-                slaves[i].pending_task--;  
-            }
+                for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){ 
+                    slaves[i].pending_task--;  
+                }
             
-            //sendInfo();
+                //sendInfo();
 
-            if(slaves[i].pending_task<=0){
-                assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);     
-            }
+                if(slaves[i].pending_task<=0){
+                    assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);     
+                }
                 printf(buffer);
 
                 //read leer lo que esta en el file descriptor e imprimir (ir al proceso vista)
                 //le queda alguna tarea? entonces le mando una mas
                 //si no le quedan mas tareas para procesar -> assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);                
             }
-            }
         }
+    }
 
-        */
+        
     
     return 0;
 }
 
-static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count){
+static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count){ //VER!!!! por que hay que pasar slaves[CANT_CHILD] es necesario el CANT_CHILD??
     int childMaster[2],masterChild[2];
     pid_t pid;
 
@@ -129,7 +127,7 @@ static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, i
             ERROR_HANDLER("Error creating pipe\n");
         }
         if((pid=fork())==0){   
-            if(dup2(childMaster[WRITE],STDOUT)<0){ //0 donde escribe el hijo eso quiero que vaya a la parte de escritura del pipe que es [1]
+            if(dup2(childMaster[WRITE],STDOUT)==-1){ //0 donde escribe el hijo eso quiero que vaya a la parte de escritura del pipe que es [1]
                // read en childMaster[0] va a leer hola (el padre)
                ERROR_HANDLER("Error dupping pipe\n");
             }

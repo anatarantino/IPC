@@ -130,3 +130,199 @@ cd ro
 cd root/
 ls
 ./solve CBS_k3_n100_m403_b10_3.cnf 
+cd root/
+apt-get install minisat
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+man dprintf
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+man dprintf
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+man sprintf
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
+gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/*
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/* &
+ps au
+ps au
+./solve CBS_k3_n100_m403_b10/* &
+ps au
+ps au
+ps ax
+ps au
+kill 4893
+man kill
+ps au
+gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
+./solve CBS_k3_n100_m403_b10/* &
+./solve CBS_k3_n100_m403_b10/* 
+./solve CBS_k3_n100_m403_b10/* 

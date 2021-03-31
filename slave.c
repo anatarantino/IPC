@@ -19,14 +19,12 @@ static void processFile(char * file);
 
 int main(int argc, char const *argv[])
 {
-    //printf("Estoy en el slave\n");
 
     if (setvbuf(stdout, NULL, _IONBF, 0) != 0){
         ERROR_HANDLER("slave");
     }
 
     for(size_t i=1 ; i<argc ; i++){     //arranca en 1 por el nombre del programa en argv
-        //printf("Estoy en el for del main del slave\n");
         processFile((char *)argv[i]);
     }
 
