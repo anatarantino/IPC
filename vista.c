@@ -13,10 +13,10 @@
 
 int main(int argc, char const *argv[]){
 
-    
+
 
 }
-
+/*
 static void initShm(){
 
 }
@@ -28,3 +28,4 @@ static void endShm(){
 static void endSem(){
 
 }
+*/

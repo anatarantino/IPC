@@ -204,7 +204,7 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
     (*file_count)++;
 }
 
-
+/*
 static void sendInfo(const char *name, int oflag, mode_t mode){ // oflag --> O_RDWR     Open the object for read-write access.
     int shm_fd = shm_open(name, oflag, mode); // name should be  identified by a name of the form /somename; /shm
     if(shm_fd == -1){
@@ -216,5 +216,5 @@ static void sendInfo(const char *name, int oflag, mode_t mode){ // oflag --> O_R
         //error -1
     //close del shm_fd
 }
-
+*/
 
