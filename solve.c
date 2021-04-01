@@ -26,6 +26,9 @@
 #define STDOUT 1
 #define CANT_CHILD 8
 #define FILES_PER_CHILD 5
+#define SHM_NAME "/shm_name"
+#define SEM_NAME "/sem_name"
+#define PERM 0666
 #define ERROR_HANDLER(message)  \
     do{                         \
         perror(message);        \
@@ -43,20 +46,17 @@ typedef struct{
 static void initChildren(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count);
 static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files, int * file_count);
 static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd);
-static void endShm(void * smap, int shm_fd, size_t size);
-static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count);
+static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file);
+static void closeChildren(struct_slave children[], size_t cant_children);
+static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem_name);
 
 int main(int argc, char const *argv[])
 {
     int total_files=argc-1;
 
     if(total_files < 1) {
-        fprintf(stderr,"No files\n");
-        exit(EXIT_FAILURE);
+        ERROR_HANDLER("No files");
     }
-
-    //int cant_child=CANT_CHILD;
-    //int files_per_child=5;
 
     char buffer[MAX_SIZE+1];
     int file_count=1;
@@ -64,18 +64,23 @@ int main(int argc, char const *argv[])
 
     int shm_fd;
     
-    void * smap = initShm("/shm",O_CREAT | O_RDWR, 0666,total_files * MAX_SIZE, &shm_fd); //chequear size
+    void * smap = initShm(SHM_NAME,O_CREAT | O_RDWR, PERM,total_files * MAX_SIZE, &shm_fd); //chequear size
+    sem_t * sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, PERM, 0);
+    if(sem == SEM_FAILED){
+        ERROR_HANDLER("Error in function sem_open");
+    }
     
     FILE * output_file = fopen("output.txt","w");
     if(output_file == NULL){
         ERROR_HANDLER("Error in function fopen");
     }
 
+    printf("%d\n",total_files);
+
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
 
     struct_slave slaves[CANT_CHILD];
     initChildren(slaves, FILES_PER_CHILD, &total_files, (char**)(argv+1), CANT_CHILD, &file_count);
-
 
     fd_set read_fds;
     int max_fd_read=-1;
@@ -106,7 +111,7 @@ int main(int argc, char const *argv[])
                     buffer[read_count]=0;
                 }
 
-                sendInfo(buffer, output_file,smap,&smap_count);
+                sendInfo(buffer, output_file,smap,&smap_count,sem);
 
                 for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){ 
                     slaves[i].pending_task--;  
@@ -126,7 +131,7 @@ int main(int argc, char const *argv[])
         
     }
 
-    endShm(smap, shm_fd, MAX_SIZE); //para cerrar la memoria compartida y fd y chequear size !!!!
+    closure(smap, shm_fd, total_files * MAX_SIZE,SHM_NAME, sem, SEM_NAME, slaves,CANT_CHILD,output_file); //para cerrar la memoria compartida y fd y chequear size !!!!
   
     return 0;
 }
@@ -233,16 +238,8 @@ static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int
     return smap;
 }
 
-static void endShm(void * smap, int shm_fd, size_t size){
-    if(close(shm_fd) == -1){
-        ERROR_HANDLER("Error in function close");
-    }
-    if(munmap(smap,size) == -1){
-        ERROR_HANDLER("Error in function munmap");
-    }
-} 
 
-static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count){
+static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem_name){
     if(fwrite(buffer, strlen(buffer), sizeof(char), output_file) == 0){
         ERROR_HANDLER("Error in function fwrite");
     }
@@ -250,6 +247,11 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
     size_t size = strlen(buffer);
     memcpy(smap + *smap_count,buffer,size);
     (*smap_count)+=size;
+
+    if(sem_post(sem_name) == -1){
+        ERROR_HANDLER("Error in function sem_post");
+    }
+
     /* hay que hacerlo cuando terminamos 
     if(fclose(output_file) == EOF){
         ERROR_HANDLER("Error in function fclose");
@@ -257,3 +259,42 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
     */
 }
 
+static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file){
+    if(munmap(smap,size) == -1){
+        ERROR_HANDLER("Error in function munmap");
+    }
+
+    if(close(shm_fd) == -1){
+        ERROR_HANDLER("Error in function close");
+    }
+
+    closeChildren(children, cant_children);
+
+    if(sem_close(sem) == -1){
+        ERROR_HANDLER("Error in function sem_close");
+    }
+
+    if(sem_unlink(sem_name) == -1){
+        ERROR_HANDLER("Error in function sem_unlink");
+    }
+
+    if(shm_unlink(shm_name) == -1){
+        ERROR_HANDLER("Error in function shm_unlink");
+    }
+
+    if(fclose(output_file) == EOF){
+        ERROR_HANDLER("Error in function fclose");
+    }
+
+} 
+
+static void closeChildren(struct_slave children[], size_t cant_children){
+    for(size_t i=0 ; i<cant_children ; i++){
+        if(close(children[i].input) == -1){
+            ERROR_HANDLER("Error in function close - children input");
+        }
+        if(close(children[i].output) == -1){
+            ERROR_HANDLER("Error in function close - children output");
+        }
+    }
+}
