@@ -42,6 +42,8 @@ typedef struct{
 
 static void initChildren(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count);
 static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files, int * file_count);
+static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd);
+static void endShm(void * smap, int shm_fd, size_t size);
 
 int main(int argc, char const *argv[])
 {
@@ -58,9 +60,11 @@ int main(int argc, char const *argv[])
     int file_count=1;
     int read_count;
 
-//    char * shmem = shmopen();
-//    char * mmap = mmap();
+    int shm_fd;
+
+    void * smap = initShm("/shm",O_RDWR, 0666,MAX_SIZE, &shm_fd); //chequear size
     
+
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
 
     struct_slave slaves[CANT_CHILD];
@@ -113,12 +117,13 @@ int main(int argc, char const *argv[])
         }
         
     }
-
-        
+    //!!!
+    //endShm(smap, shm_fd, MAX_SIZE); //para cerrar la memoria compartida y fd y chequear size !!!!
+    //!!!    
     return 0;
 }
 
-static void initChildren(struct_slave slaves[CANT_CHILD], int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count){ //VER!!!! por que hay que pasar slaves[CANT_CHILD] es necesario el CANT_CHILD??
+static void initChildren(struct_slave slaves[], int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count){ 
     int childMaster[2],masterChild[2];
     pid_t pid;
 
@@ -204,17 +209,26 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
     (*file_count)++;
 }
 
-/*
-static void sendInfo(const char *name, int oflag, mode_t mode){ // oflag --> O_RDWR     Open the object for read-write access.
-    int shm_fd = shm_open(name, oflag, mode); // name should be  identified by a name of the form /somename; /shm
+static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd){ // oflag --> O_RDWR     Open the object for read-write access.
+    shm_fd = shm_open(name, oflag, mode); // name should be  identified by a name of the form /somename; /shm
     if(shm_fd == -1){
         ERROR_HANDLER("Error in function shm_open\n");
     }
-    //mmap del shm_fd
-        //void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
-        // prot PROT_READ  Pages may be read. PROT_WRITE Pages may be written.
-        //error -1
-    //close del shm_fd
-}
-*/
+ 
+    void * smap = mmap(NULL, size, PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    if(smap == MAP_FAILED){
+        ERROR_HANDLER("Error in function mmap");
+    }
 
+
+    return smap;
+}
+
+static void endShm(void * smap, int shm_fd, size_t size){
+    if(close(shm_fd) == -1){
+        ERROR_HANDLER("Error in function close");
+    }
+    if(munmap(smap,size) == -1){
+        ERROR_HANDLER("Error in function munmap");
+    }
+} 
