@@ -11,7 +11,7 @@
 #include <sys/shm.h>
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
-//#include <fcntl.h>           /* For O_* constants */
+#include <fcntl.h>           /* For O_* constants */
 #include <sys/select.h>
 #include <time.h>
 #include <unistd.h>
@@ -44,6 +44,7 @@ static void initChildren(struct_slave *slaves, int files_per_child, int *total_f
 static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files, int * file_count);
 static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd);
 static void endShm(void * smap, int shm_fd, size_t size);
+static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count);
 
 int main(int argc, char const *argv[])
 {
@@ -53,6 +54,7 @@ int main(int argc, char const *argv[])
         fprintf(stderr,"No files\n");
         exit(EXIT_FAILURE);
     }
+
     //int cant_child=CANT_CHILD;
     //int files_per_child=5;
 
@@ -61,9 +63,13 @@ int main(int argc, char const *argv[])
     int read_count;
 
     int shm_fd;
-
-    void * smap = initShm("/shm",O_RDWR, 0666,MAX_SIZE, &shm_fd); //chequear size
     
+    void * smap = initShm("/shm",O_CREAT | O_RDWR, 0666,total_files * MAX_SIZE, &shm_fd); //chequear size
+    
+    FILE * output_file = fopen("output.txt","w");
+    if(output_file == NULL){
+        ERROR_HANDLER("Error in function fopen");
+    }
 
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
 
@@ -73,6 +79,7 @@ int main(int argc, char const *argv[])
 
     fd_set read_fds;
     int max_fd_read=-1;
+    size_t smap_count=0;
 
     while(total_files > 0){
         FD_ZERO(&read_fds);
@@ -98,18 +105,19 @@ int main(int argc, char const *argv[])
                 if(read_count!=0){
                     buffer[read_count]=0;
                 }
-            
+
+                sendInfo(buffer, output_file,smap,&smap_count);
+
                 for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){ 
                     slaves[i].pending_task--;  
                 }
-            
-                //sendInfo();
 
                 if(slaves[i].pending_task<=0){
                     assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files,&file_count); 
                       
                 }
-                printf(buffer);
+
+                //printf(buffer);
                 //read leer lo que esta en el file descriptor e imprimir (ir al proceso vista)
                 //le queda alguna tarea? entonces le mando una mas
                 //si no le quedan mas tareas para procesar -> assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);                
@@ -117,9 +125,9 @@ int main(int argc, char const *argv[])
         }
         
     }
-    //!!!
-    //endShm(smap, shm_fd, MAX_SIZE); //para cerrar la memoria compartida y fd y chequear size !!!!
-    //!!!    
+
+    endShm(smap, shm_fd, MAX_SIZE); //para cerrar la memoria compartida y fd y chequear size !!!!
+  
     return 0;
 }
 
@@ -159,14 +167,13 @@ static void initChildren(struct_slave slaves[], int files_per_child, int *total_
 
             char * args[files_per_child + 2]; 
             int j=0;
-            args[j++] = "slave";
+            args[j++] = "slave.out";
             for(j=1 ; j<files_per_child + 1; j++){
               //  printf("----\nArchivo: %d-----\n",file_count);
                 args[j] = argv[(*file_count)++];
-            
             }
             args[j] = NULL;
-        
+            
             if(execv(args[0], args)==-1){
                 ERROR_HANDLER("Error in execv function");
             }
@@ -209,17 +216,19 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
     (*file_count)++;
 }
 
+
 static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd){ // oflag --> O_RDWR     Open the object for read-write access.
-    shm_fd = shm_open(name, oflag, mode); // name should be  identified by a name of the form /somename; /shm
-    if(shm_fd == -1){
+    *shm_fd = shm_open(name, oflag, mode); // name should be  identified by a name of the form /somename; /shm
+    if((*shm_fd) == -1){
         ERROR_HANDLER("Error in function shm_open\n");
     }
- 
-    void * smap = mmap(NULL, size, PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    if(ftruncate(*shm_fd, size) == -1)
+        ERROR_HANDLER("Error in function ftruncate");
+        
+    void * smap = mmap(NULL, size, PROT_WRITE, MAP_SHARED, *shm_fd, 0);
     if(smap == MAP_FAILED){
         ERROR_HANDLER("Error in function mmap");
     }
-
 
     return smap;
 }
@@ -232,3 +241,19 @@ static void endShm(void * smap, int shm_fd, size_t size){
         ERROR_HANDLER("Error in function munmap");
     }
 } 
+
+static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count){
+    if(fwrite(buffer, strlen(buffer), sizeof(char), output_file) == 0){
+        ERROR_HANDLER("Error in function fwrite");
+    }
+
+    size_t size = strlen(buffer);
+    memcpy(smap + *smap_count,buffer,size);
+    (*smap_count)+=size;
+    /* hay que hacerlo cuando terminamos 
+    if(fclose(output_file) == EOF){
+        ERROR_HANDLER("Error in function fclose");
+    }
+    */
+}
+
