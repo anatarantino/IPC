@@ -64,10 +64,10 @@ int main(int argc, char const *argv[])
 
     int shm_fd;
     
-    void * smap = initShm(SHM_NAME,O_CREAT | O_RDWR, PERM,total_files * MAX_SIZE, &shm_fd); //chequear size
+    void * smap = initShm(SHM_NAME,O_CREAT | O_RDWR, PERM,total_files * MAX_SIZE, &shm_fd); 
     sem_t * sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, PERM, 0);
     if(sem == SEM_FAILED){
-        ERROR_HANDLER("Error in function sem_open");
+        ERROR_HANDLER("Error in function sem_open - solve");
     }
     
     FILE * output_file = fopen("output.txt","w");
@@ -131,7 +131,7 @@ int main(int argc, char const *argv[])
         
     }
 
-    closure(smap, shm_fd, total_files * MAX_SIZE,SHM_NAME, sem, SEM_NAME, slaves,CANT_CHILD,output_file); //para cerrar la memoria compartida y fd y chequear size !!!!
+    closure(smap, shm_fd, total_files * MAX_SIZE,SHM_NAME, sem, SEM_NAME, slaves,CANT_CHILD,output_file); 
   
     return 0;
 }
@@ -222,8 +222,8 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
 }
 
 
-static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd){ // oflag --> O_RDWR     Open the object for read-write access.
-    *shm_fd = shm_open(name, oflag, mode); // name should be  identified by a name of the form /somename; /shm
+static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd){ 
+    *shm_fd = shm_open(name, oflag, mode);
     if((*shm_fd) == -1){
         ERROR_HANDLER("Error in function shm_open\n");
     }
@@ -261,31 +261,31 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
 
 static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file){
     if(munmap(smap,size) == -1){
-        ERROR_HANDLER("Error in function munmap");
+        ERROR_HANDLER("Error in function munmap - solve");
     }
 
+    if(shm_unlink(shm_name) == -1){
+        ERROR_HANDLER("Error in function shm_unlink");
+    }
+    
     if(close(shm_fd) == -1){
         ERROR_HANDLER("Error in function close");
     }
 
     closeChildren(children, cant_children);
 
-    if(sem_close(sem) == -1){
-        ERROR_HANDLER("Error in function sem_close");
+    if(fclose(output_file) == EOF){
+        ERROR_HANDLER("Error in function fclose");
     }
 
     if(sem_unlink(sem_name) == -1){
         ERROR_HANDLER("Error in function sem_unlink");
     }
 
-    if(shm_unlink(shm_name) == -1){
-        ERROR_HANDLER("Error in function shm_unlink");
+    if(sem_close(sem) == -1){
+        ERROR_HANDLER("Error in function sem_close");
     }
-
-    if(fclose(output_file) == EOF){
-        ERROR_HANDLER("Error in function fclose");
-    }
-
+    
 } 
 
 static void closeChildren(struct_slave children[], size_t cant_children){
