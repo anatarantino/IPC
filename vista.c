@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #define MAX_LEN 5   
 #define MAX_SIZE 4096
@@ -28,15 +29,16 @@ int main(int argc, char const *argv[]){
 
     if(argc <= 1){
         char stdin_buffer[MAX_LEN];
-        if(read(STDIN_FILENO, stdin_buffer, MAX_LEN) == -1){
+        size_t count;
+        if((count=read(STDOUT_FILENO, stdin_buffer, MAX_LEN)) == -1){
             ERROR_HANDLER("Error in function read");
         }
+        stdin_buffer[count]=0;
         total_files = atoi(stdin_buffer);
     }
     else{
         total_files = atoi(argv[1]);
     }
-    
 
     sem_t * sem = sem_open(SEM_NAME, O_CREAT, PERM, 0);
     if(sem == SEM_FAILED){
@@ -48,24 +50,21 @@ int main(int argc, char const *argv[]){
     char *map_pointer = smap;
 
     int counter = 0;
-    char buff[MAX_SIZE];
 
     while(counter < total_files){
         if(sem_wait(sem) == -1){
         ERROR_HANDLER("Error in function sem_wait");
         }
 
-        int i;
+        char * next;
 
-        for(i=0; map_pointer != 0; i++){
-            buff[i] = map_pointer[i];
+        if((next=strchr(map_pointer,'\t'))==NULL){
+            ERROR_HANDLER("Error in function strchr");
         }
-        buff[i++] = 0;
-
-        printf("%s", buff);
-
-        map_pointer += i;
-        counter++;
+        *next='\0';
+        next++;
+        printf("%s\n", map_pointer);
+        map_pointer = next;
     }
 
     closure(smap, shm_fd, MAX_SIZE, SHM_NAME, sem, SEM_NAME);
@@ -101,10 +100,6 @@ static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t 
     if(close(shm_fd) == -1){
         ERROR_HANDLER("Error in function close");
     }
-
-    
-
-    
 
     if(shm_unlink(shm_name) == -1){
         ERROR_HANDLER("Error in function shm_unlink");

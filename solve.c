@@ -48,7 +48,7 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
 static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd);
 static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file);
 static void closeChildren(struct_slave children[], size_t cant_children);
-static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem_name);
+static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem_name, int cant_task);
 
 int main(int argc, char const *argv[])
 {
@@ -65,7 +65,8 @@ int main(int argc, char const *argv[])
     int shm_fd;
     
     void * smap = initShm(SHM_NAME,O_CREAT | O_RDWR, PERM,total_files * MAX_SIZE, &shm_fd); 
-    sem_t * sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, PERM, 0);
+    sem_t * sem = sem_open(SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH, 0);
+    
     if(sem == SEM_FAILED){
         ERROR_HANDLER("Error in function sem_open - solve");
     }
@@ -75,7 +76,7 @@ int main(int argc, char const *argv[])
         ERROR_HANDLER("Error in function fopen");
     }
 
-    printf("%d\n",total_files);
+    printf("%d",total_files);
 
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
 
@@ -111,15 +112,17 @@ int main(int argc, char const *argv[])
                     buffer[read_count]=0;
                 }
 
-                sendInfo(buffer, output_file,smap,&smap_count,sem);
+                int cant_task=0;
 
                 for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){ 
-                    slaves[i].pending_task--;  
+                    slaves[i].pending_task--;
+                    cant_task++;  
                 }
 
+                sendInfo(buffer, output_file,smap,&smap_count,sem,cant_task);
+
                 if(slaves[i].pending_task<=0){
-                    assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files,&file_count); 
-                      
+                    assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files,&file_count);
                 }
 
                 //printf(buffer);
@@ -239,7 +242,7 @@ static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int
 }
 
 
-static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem_name){
+static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem_name, int cant_task){
     if(fwrite(buffer, strlen(buffer), sizeof(char), output_file) == 0){
         ERROR_HANDLER("Error in function fwrite");
     }
@@ -248,9 +251,12 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
     memcpy(smap + *smap_count,buffer,size);
     (*smap_count)+=size;
 
-    if(sem_post(sem_name) == -1){
-        ERROR_HANDLER("Error in function sem_post");
-    }
+
+    for (size_t i = 0; i<cant_task ; i++){
+        if(sem_post(sem_name) == -1){
+            ERROR_HANDLER("Error in function sem_post");
+        }
+    }   
 
     /* hay que hacerlo cuando terminamos 
     if(fclose(output_file) == EOF){
@@ -260,9 +266,9 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
 }
 
 static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file){
-    if(munmap(smap,size) == -1){
+   /* if(munmap(smap,size) == -1){
         ERROR_HANDLER("Error in function munmap - solve");
-    }
+    }*/
 
     if(shm_unlink(shm_name) == -1){
         ERROR_HANDLER("Error in function shm_unlink");
