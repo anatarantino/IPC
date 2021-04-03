@@ -46,7 +46,7 @@ Ejecucion:
 
     Una vez que el programa solve termine, se creará un archivo output.txt con los resultados. Esto es indiferente si se ejecuta el vista o no.
 
-Testing:
+Testeos:
 
     Para realizar un testeo con valgrind, es necesario indicar en el Makefile el directorio donde se encuentran los archivos .cnf a analizar. Para ello, basta con asignar a la variable TESTF ese directorio.
     Luego, para realizar los testeos puede utilizar el siguiente comando:
