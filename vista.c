@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]){
     if(argc <= 1){
         char stdin_buffer[MAX_LEN];
         size_t count;
-        if((count=read(STDOUT_FILENO, stdin_buffer, MAX_LEN)) == -1){
+        if((count=read(STDIN_FILENO, stdin_buffer, MAX_LEN)) == -1){
             ERROR_HANDLER("Error in function read");
         }
         stdin_buffer[count]=0;
@@ -39,21 +39,24 @@ int main(int argc, char const *argv[]){
     else{
         total_files = atoi(argv[1]);
     }
+    sem_t *sem = sem_open(SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH, 0);
 
-    sem_t * sem = sem_open(SEM_NAME, O_CREAT, PERM, 0);
+    //sem_t * sem = sem_open(SEM_NAME, O_CREAT, PERM, 0);
     if(sem == SEM_FAILED){
         ERROR_HANDLER("Error in function sem_open");
     }
     int shm_fd;
-    void * smap = initShm(SHM_NAME, O_RDONLY, PERM,total_files * MAX_SIZE, &shm_fd);
+    void * smap = initShm(SHM_NAME, O_CREAT | O_RDWR, PERM,total_files * MAX_SIZE, &shm_fd);
     
     char *map_pointer = smap;
 
     int counter = 0;
-
     while(counter < total_files){
+        int i = -1;
+        sem_getvalue(sem,&i);
+        printf("calor: %d\n",i);
         if(sem_wait(sem) == -1){
-        ERROR_HANDLER("Error in function sem_wait");
+            ERROR_HANDLER("Error in function sem_wait");
         }
 
         char * next;
@@ -71,13 +74,12 @@ int main(int argc, char const *argv[]){
 }
 
 static char * initShm(const char *shm_name, int shm_oflag, mode_t mode, size_t size, int *shm_fd){
-
     *shm_fd = shm_open(shm_name, shm_oflag, mode); 
     if((*shm_fd) == -1){
-        ERROR_HANDLER("Error in function shm_open\n");
+        ERROR_HANDLER("Error in function shm_open - vista");
     }
 
-    char * smap = mmap(NULL, size, PROT_READ, MAP_SHARED, *shm_fd, 0);
+    char * smap = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, *shm_fd, 0);
     if(smap == MAP_FAILED){
         ERROR_HANDLER("Error in function mmap - vista");
     }

@@ -110,19 +110,20 @@ int main(int argc, char const *argv[])
                 }
                 if(read_count!=0){
                     buffer[read_count]=0;
-                }
+                
+                    int cant_task=0;
 
-                int cant_task=0;
+                   // fprintf(stderr, "PENDING TASK: %d\n", slaves[i].pending_task);
+                    for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){ 
+                        slaves[i].pending_task--;
+                        cant_task++;  
+                    }
 
-                for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){ 
-                    slaves[i].pending_task--;
-                    cant_task++;  
-                }
+                    sendInfo(buffer, output_file,smap,&smap_count,sem,cant_task);
 
-                sendInfo(buffer, output_file,smap,&smap_count,sem,cant_task);
-
-                if(slaves[i].pending_task<=0){
-                    assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files,&file_count);
+                    if(slaves[i].pending_task<=0){
+                        assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files,&file_count);
+                    }
                 }
 
                 //printf(buffer);
@@ -242,7 +243,7 @@ static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int
 }
 
 
-static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem_name, int cant_task){
+static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem, int cant_task){
     if(fwrite(buffer, strlen(buffer), sizeof(char), output_file) == 0){
         ERROR_HANDLER("Error in function fwrite");
     }
@@ -253,7 +254,8 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
 
 
     for (size_t i = 0; i<cant_task ; i++){
-        if(sem_post(sem_name) == -1){
+   // fprintf(stderr, "post\n");
+        if(sem_post(sem) == -1){
             ERROR_HANDLER("Error in function sem_post");
         }
     }   
@@ -283,7 +285,7 @@ static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t 
     if(fclose(output_file) == EOF){
         ERROR_HANDLER("Error in function fclose");
     }
-
+/*
     if(sem_unlink(sem_name) == -1){
         ERROR_HANDLER("Error in function sem_unlink");
     }
@@ -291,7 +293,7 @@ static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t 
     if(sem_close(sem) == -1){
         ERROR_HANDLER("Error in function sem_close");
     }
-    
+  */  
 } 
 
 static void closeChildren(struct_slave children[], size_t cant_children){

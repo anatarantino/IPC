@@ -28,8 +28,6 @@ int main(int argc, char const *argv[])
         processFile((char *)argv[i]);
     }
     
-    
-
     char file[MAX_SIZE + 1]={0};
     ssize_t count;
     while((count = read(STDIN_FILENO, file, MAX_SIZE)) != 0){ 
