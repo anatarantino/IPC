@@ -79,11 +79,17 @@ int main(int argc, char const *argv[])
         ERROR_HANDLER("Error in function fopen");
     }
 
+    int init_files_count=FILES_PER_CHILD, init_slaves_count=CANT_CHILD;
+    if(CANT_CHILD*FILES_PER_CHILD>total_files){
+        init_slaves_count = total_files;
+        init_files_count = 1;
+    }
+
     printf("%d", total_files);
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
+    struct_slave slaves[init_slaves_count];
 
-    struct_slave slaves[CANT_CHILD];
-    initChildren(slaves, FILES_PER_CHILD, (char**)(argv+1), CANT_CHILD, &file_count);
+    initChildren(slaves, init_files_count, (char**)(argv+1), init_slaves_count, &file_count);
 
     fd_set read_fds;
     int max_fd_read=-1;
@@ -92,7 +98,7 @@ int main(int argc, char const *argv[])
     while(processed_tasks < total_files){
         FD_ZERO(&read_fds);
 
-        for(int i=0 ; i<CANT_CHILD ; i++) {
+        for(int i=0 ; i<init_slaves_count ; i++) {
             FD_SET(slaves[i].output,&read_fds);
             if(slaves[i].output > max_fd_read){
                 max_fd_read = slaves[i].output;
@@ -104,7 +110,7 @@ int main(int argc, char const *argv[])
             ERROR_HANDLER("Error in select function\n");
         }
 
-        for(int i=0 ; i<CANT_CHILD; i++) {
+        for(int i=0 ; i<init_slaves_count; i++) {
                 
             if(FD_ISSET(slaves[i].output,&read_fds)){ 
                 if((read_count=read(slaves[i].output,buffer,MAX_SIZE))==-1){
@@ -131,7 +137,7 @@ int main(int argc, char const *argv[])
             }
         }      
     }
-    closure(smap, shm_fd, map_size,SHM_NAME, sem, SEM_NAME, slaves,CANT_CHILD,output_file); 
+    closure(smap, shm_fd, map_size,SHM_NAME, sem, SEM_NAME, slaves,init_slaves_count,output_file); 
   
     return 0;
 }
@@ -173,8 +179,8 @@ static void initChildren(struct_slave slaves[], int files_per_child, char *argv[
             char * args[files_per_child + 2]; 
             int j=0;
             args[j++] = "slave.out";
-            for(j=1 ; j<files_per_child + 1; j++){
-              //  printf("----\nArchivo: %d-----\n",file_count);
+            for(int k=0; k<files_per_child; j++,k++){ // no está procesando uno de los archivos que mandamos, no sabemos si es el primero, el último o cual. Seguro esta aca el error
+                fprintf(stderr,"archivo: %s, %d\n",argv[(*file_count)],files_per_child);
                 args[j] = argv[(*file_count)++];
             }
             args[j] = NULL;
