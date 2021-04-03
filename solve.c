@@ -226,6 +226,7 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
 }
 
 
+
 static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd){ 
     *shm_fd = shm_open(name, oflag, mode);
     if((*shm_fd) == -1){
@@ -268,9 +269,9 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
 }
 
 static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file){
-   /* if(munmap(smap,size) == -1){
+    if(munmap(smap,size) == -1){
         ERROR_HANDLER("Error in function munmap - solve");
-    }*/
+    }
 
     if(shm_unlink(shm_name) == -1){
         ERROR_HANDLER("Error in function shm_unlink");
@@ -285,7 +286,7 @@ static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t 
     if(fclose(output_file) == EOF){
         ERROR_HANDLER("Error in function fclose");
     }
-/*
+
     if(sem_unlink(sem_name) == -1){
         ERROR_HANDLER("Error in function sem_unlink");
     }
@@ -293,7 +294,7 @@ static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t 
     if(sem_close(sem) == -1){
         ERROR_HANDLER("Error in function sem_close");
     }
-  */  
+  
 } 
 
 static void closeChildren(struct_slave children[], size_t cant_children){
