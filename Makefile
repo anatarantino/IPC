@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -pedantic -g -fsanitize=address -std=c99
-CLIBS = -lrt -pthread
+CLIBS = -pthread -lrt 
 RM = rm -f
 
 SOURCES = $(wildcard *.c)

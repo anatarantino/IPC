@@ -60,19 +60,21 @@ int main(int argc, char const *argv[]){
     
     while(counter < total_files){
         
+        int s = -1;
         if(sem_wait(sem) == -1){
             ERROR_HANDLER("Error in function sem_wait");
         }
-        
         char * next;
-
+       sem_getvalue(sem, &s);
+      //  fprintf(stderr, "wait %d \n", s);  
         if((next=strchr(map_pointer,'\t'))==NULL){
             ERROR_HANDLER("Error in function strchr");
         }
         *next='\0';
+        printf("%s",map_pointer);
         next++;
         counter++;
-        map_pointer = next;
+        map_pointer = next; 
     }
     closure(smap, shm_fd, total_files * MAX_SIZE, SHM_NAME, sem, SEM_NAME);
 }

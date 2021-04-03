@@ -53,6 +53,7 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
 int main(int argc, char const *argv[])
 {
     int total_files=argc-1;
+    int processed_tasks=0;
 
     if(total_files < 1) {
         ERROR_HANDLER("No files");
@@ -88,7 +89,7 @@ int main(int argc, char const *argv[])
     int max_fd_read=-1;
     size_t smap_count=0;
 
-    while(total_files > 0){
+    while(processed_tasks < total_files){
         FD_ZERO(&read_fds);
 
         for(int i=0 ; i<CANT_CHILD ; i++) {
@@ -117,7 +118,8 @@ int main(int argc, char const *argv[])
                     for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){ 
                         slaves[i].pending_task--;
                         cant_task++;
-                        total_files--;  
+                       // printf("processed: %d\n",processed_tasks);
+                        processed_tasks++;
                     }
 
                     sendInfo(buffer, output_file,smap,&smap_count,sem,cant_task);
@@ -191,7 +193,7 @@ static void initChildren(struct_slave slaves[], int files_per_child, char *argv[
             //osea los que no use aca
         slaves[i].pending_task+=files_per_child;
         slaves[i].pid=pid;
-        *file_count+=files_per_child;
+        (*file_count)+=files_per_child;
 
         if(close(masterChild[READ])==-1){
             ERROR_HANDLER("Error closing file descriptor");
@@ -244,13 +246,9 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
 
 
     for (size_t i = 0; i<cant_task ; i++){
-   // fprintf(stderr, "post\n");
         if(sem_post(sem) == -1){
             ERROR_HANDLER("Error in function sem_post");
         }
-        //int s = -1;
-        //sem_getvalue(sem, &s);
-        //fprintf(stderr, "semaforooooo %d \n", s);     imprime ok
     }   
 
 }
@@ -260,10 +258,10 @@ static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t 
         ERROR_HANDLER("Error in function munmap - solve");
     }
 
-    if(shm_unlink(shm_name) == -1){
+   /* if(shm_unlink(shm_name) == -1){
         ERROR_HANDLER("Error in function shm_unlink");
     }
-    
+    */
     if(close(shm_fd) == -1){
         ERROR_HANDLER("Error in function close");
     }
@@ -274,10 +272,10 @@ static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t 
         ERROR_HANDLER("Error in function fclose");
     }
 
-    if(sem_unlink(sem_name) == -1){
+  /*  if(sem_unlink(sem_name) == -1){
         ERROR_HANDLER("Error in function sem_unlink");
     }
-
+*/
     if(sem_close(sem) == -1){
         ERROR_HANDLER("Error in function sem_close");
     }
