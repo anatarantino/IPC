@@ -43,8 +43,8 @@ typedef struct{
     int pending_task;
 }struct_slave;
 
-static void initChildren(struct_slave *slaves, int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count);
-static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files, int * file_count);
+static void initChildren(struct_slave *slaves, int files_per_child, char *argv[], int cant_child, int *file_count);
+static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * file_count);
 static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd);
 static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file);
 static void closeChildren(struct_slave children[], size_t cant_children);
@@ -63,9 +63,11 @@ int main(int argc, char const *argv[])
     int read_count;
 
     int shm_fd;
+
+    int map_size = total_files * MAX_SIZE;
     
-    void * smap = initShm(SHM_NAME,O_CREAT | O_RDWR, PERM,total_files * MAX_SIZE, &shm_fd); 
-    sem_t * sem = sem_open(SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH, 0);
+    void * smap = initShm(SHM_NAME,O_CREAT | O_RDWR, PERM,map_size, &shm_fd); 
+    sem_t * sem = sem_open(SEM_NAME, O_CREAT, PERM, 0);
     
     if(sem == SEM_FAILED){
         ERROR_HANDLER("Error in function sem_open - solve");
@@ -76,12 +78,11 @@ int main(int argc, char const *argv[])
         ERROR_HANDLER("Error in function fopen");
     }
 
-    printf("%d",total_files);
-
+    printf("%d", total_files);
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
 
     struct_slave slaves[CANT_CHILD];
-    initChildren(slaves, FILES_PER_CHILD, &total_files, (char**)(argv+1), CANT_CHILD, &file_count);
+    initChildren(slaves, FILES_PER_CHILD, (char**)(argv+1), CANT_CHILD, &file_count);
 
     fd_set read_fds;
     int max_fd_read=-1;
@@ -97,7 +98,7 @@ int main(int argc, char const *argv[])
             }
         }
 
-        int cant_fd = select(max_fd_read+1, &read_fds,NULL,NULL,NULL); //solo importan los fd de lectura
+        int cant_fd = select(max_fd_read+1, &read_fds,NULL,NULL,NULL);
         if(cant_fd == -1){
             ERROR_HANDLER("Error in select function\n");
         }
@@ -113,34 +114,27 @@ int main(int argc, char const *argv[])
                 
                     int cant_task=0;
 
-                   // fprintf(stderr, "PENDING TASK: %d\n", slaves[i].pending_task);
                     for(char *j= buffer; (j=strchr(j,'\t'))!=NULL; j++){ 
                         slaves[i].pending_task--;
-                        cant_task++;  
+                        cant_task++;
+                        total_files--;  
                     }
 
                     sendInfo(buffer, output_file,smap,&smap_count,sem,cant_task);
 
                     if(slaves[i].pending_task<=0){
-                        assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files,&file_count);
+                        assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&file_count);
                     }
-                }
-
-                //printf(buffer);
-                //read leer lo que esta en el file descriptor e imprimir (ir al proceso vista)
-                //le queda alguna tarea? entonces le mando una mas
-                //si no le quedan mas tareas para procesar -> assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&total_files);                
+                }              
             }
-        }
-        
+        }      
     }
-
-    closure(smap, shm_fd, total_files * MAX_SIZE,SHM_NAME, sem, SEM_NAME, slaves,CANT_CHILD,output_file); 
+    closure(smap, shm_fd, map_size,SHM_NAME, sem, SEM_NAME, slaves,CANT_CHILD,output_file); 
   
     return 0;
 }
 
-static void initChildren(struct_slave slaves[], int files_per_child, int *total_files, char *argv[], int cant_child, int *file_count){ 
+static void initChildren(struct_slave slaves[], int files_per_child, char *argv[], int cant_child, int *file_count){ 
     int childMaster[2],masterChild[2];
     pid_t pid;
 
@@ -197,7 +191,6 @@ static void initChildren(struct_slave slaves[], int files_per_child, int *total_
             //osea los que no use aca
         slaves[i].pending_task+=files_per_child;
         slaves[i].pid=pid;
-        *total_files-=files_per_child;
         *file_count+=files_per_child;
 
         if(close(masterChild[READ])==-1){
@@ -210,7 +203,7 @@ static void initChildren(struct_slave slaves[], int files_per_child, int *total_
     }
 } 
 
-static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * total_files, int * file_count){
+static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * file_count){
     char buffer[MAX_SIZE];
     
     if(sprintf(buffer,"%s\n",files_array[0])<0){
@@ -221,11 +214,8 @@ static void assignTask(int * pending_task, int fd_input,const char * files_array
         ERROR_HANDLER("Error in function write\n");
     }
     (*pending_task)++;
-    (*total_files)--;
     (*file_count)++;
 }
-
-
 
 static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd){ 
     *shm_fd = shm_open(name, oflag, mode);
@@ -243,7 +233,6 @@ static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int
     return smap;
 }
 
-
 static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem, int cant_task){
     if(fwrite(buffer, strlen(buffer), sizeof(char), output_file) == 0){
         ERROR_HANDLER("Error in function fwrite");
@@ -259,13 +248,11 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
         if(sem_post(sem) == -1){
             ERROR_HANDLER("Error in function sem_post");
         }
+        //int s = -1;
+        //sem_getvalue(sem, &s);
+        //fprintf(stderr, "semaforooooo %d \n", s);     imprime ok
     }   
 
-    /* hay que hacerlo cuando terminamos 
-    if(fclose(output_file) == EOF){
-        ERROR_HANDLER("Error in function fclose");
-    }
-    */
 }
 
 static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file){

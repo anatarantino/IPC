@@ -29,7 +29,7 @@ int main(int argc, char const *argv[]){
     
     if(argc <= 1){
         char stdin_buffer[MAX_LEN];
-        size_t count;
+        size_t count = 0;
         if((count=read(STDIN_FILENO, stdin_buffer, MAX_LEN)) == -1){
             ERROR_HANDLER("Error in function read");
         }
@@ -41,7 +41,7 @@ int main(int argc, char const *argv[]){
     }
 
     if(total_files <= 0){
-        ERROR_HANDLER("Error in function total_files");         // valgrind tira error aca
+        ERROR_HANDLER("Error in receiving total_files - vista"); 
     }
 
     sem_t *sem = sem_open(SEM_NAME, O_CREAT, PERM, 0);
@@ -51,20 +51,19 @@ int main(int argc, char const *argv[]){
     }
     int shm_fd;
     
-    char * smap = initShm(SHM_NAME, O_CREAT | O_RDWR, PERM,(total_files * MAX_SIZE)-1, &shm_fd);
+    char * smap = initShm(SHM_NAME, O_CREAT | O_RDWR, PERM,total_files * MAX_SIZE, &shm_fd);
 
 
     char *map_pointer = smap;
 
     int counter = 0;
+    
     while(counter < total_files){
-        int i = -1;
-        sem_getvalue(sem,&i);
-        printf("valor: %d\n",i);
+        
         if(sem_wait(sem) == -1){
             ERROR_HANDLER("Error in function sem_wait");
         }
-
+        
         char * next;
 
         if((next=strchr(map_pointer,'\t'))==NULL){
@@ -72,11 +71,10 @@ int main(int argc, char const *argv[]){
         }
         *next='\0';
         next++;
-        printf("%s\n", map_pointer);
+        counter++;
         map_pointer = next;
     }
-
-    closure(smap, shm_fd, (total_files * MAX_SIZE)-1, SHM_NAME, sem, SEM_NAME);
+    closure(smap, shm_fd, total_files * MAX_SIZE, SHM_NAME, sem, SEM_NAME);
 }
 
 static char * initShm(const char *shm_name, int shm_oflag, mode_t mode, size_t size, int *shm_fd){
@@ -91,7 +89,6 @@ static char * initShm(const char *shm_name, int shm_oflag, mode_t mode, size_t s
     }
 
     return smap;
-
 } 
 
 static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name){
@@ -104,13 +101,10 @@ static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t 
     if(munmap(smap,size) == -1){
         ERROR_HANDLER("Error in function munmap - vista");
     }
-
     if(close(shm_fd) == -1){
         ERROR_HANDLER("Error in function close");
     }
-
     if(shm_unlink(shm_name) == -1){
         ERROR_HANDLER("Error in function shm_unlink");
     }
-
 } 

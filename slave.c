@@ -24,7 +24,7 @@ int main(int argc, char const *argv[])
         ERROR_HANDLER("Error in function setvbuf");
     }
 
-    for(size_t i=1 ; i<argc ; i++){     //arranca en 1 por el nombre del programa en argv
+    for(size_t i=1 ; i<argc ; i++){ 
         processFile((char *)argv[i]);
     }
     
@@ -59,10 +59,9 @@ static void processFile(char * file){
 
     buffer[dim]=0;
 
-    printf("File: %s\nPID: %d\n%s\n\n\t",file,getpid(),buffer); //para no usar el \n
-    //dprintf(2,"File: %s\nPID: %d\n%s\n\n%c",file,getpid(),buffer,7); //para no usar el \n
+    printf("File: %s\nPID: %d\n%s\n\n\t",file,getpid(),buffer); 
+    
     if(pclose(output)==-1){
         ERROR_HANDLER("Error in function pclose\n");
     }
-
 }
