@@ -15,3 +15,6 @@ all: $(BINS)
 
 clean:
 	$(RM) $(BINS)
+
+clean_test:
+	$(RM) 

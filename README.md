@@ -25,14 +25,37 @@ Compilacion:
         make  
     O tambien:
         make all
+    Esto creará tres archivos ejecutables: solve.out, vista.out y slave.out. Para eliminarlos ejecute make clean dentro del mismo directorio donde fueron creados.
 
 Ejecucion:
 
-    Primero es necesario ejecutar el archivo solve con los .cnf correspondientes, para lo cual puede utilizar el siguiente comando:
+    Para la ejecución es necesario contar con archivos de extensión .cnf que recibirá el programa solve.
+    Para esto utilice el comando:
         ./solve.out files/*
+    El programa enviará por salida estándar la cantidad de tareas a procesar. Este valor es utilizado por el programa vista. 
+    Hay dos maneras de ejecutar el programa:
+        1. Pasarle el resultado del solve al vista mediante un pipe.
+            ./solve.out files/* | ./vista.out
+        2. Ejecutar los procesos en dos terminales distintas.
+            Terminal 1:
+            ./solve.out files/*
+            cantArchivos
+
+            Terminal 2:
+            ./vista.out cantArchivos
+
+    Una vez que el programa solve termine, se creará un archivo output.txt con los resultados. Esto es indiferente si se ejecuta el vista o no.
 
 Testing:
 
     Para realizar un testeo con valgrind, es necesario indicar en el Makefile el directorio donde se encuentran los archivos .cnf a analizar. Para ello, basta con asignar a la variable TESTF ese directorio.
     Luego, para realizar los testeos puede utilizar el siguiente comando:
         make test
+    Los resultados se encontrarán en los siguientes archivos:
+        - PVS-Studio: ...
+        - Cppcheck: ...
+        - Valgrind: ...
+    Para eliminar estos archivos ejecute el siguiente comando en el directorio donde el comando test fue ejecutado:
+        make clean_test 
+    
+
