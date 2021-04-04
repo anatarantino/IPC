@@ -29,7 +29,7 @@ Compilacion:
 
 Ejecucion:
 
-    Para la ejecución es necesario contar con archivos de extensión .cnf que recibirá el programa solve.
+    Para la ejecuciónm es necesario contar con archivos de extensión .cnf que recibirá el programa solve.
     Para esto utilice el comando:
         ./solve.out files/*
     El programa enviará por salida estándar la cantidad de tareas a procesar. Este valor es utilizado por el programa vista. 

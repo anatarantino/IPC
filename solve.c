@@ -43,7 +43,7 @@ typedef struct{
     int pending_task;
 }struct_slave;
 
-static void initChildren(struct_slave *slaves, int files_per_child, char *argv[], int cant_child, int *file_count);
+static void initChildren(struct_slave *slaves, int files_per_child, char *argv[], int cant_child, int *index);
 static void assignTask(int * pending_task, int fd_input,const char * files_array[], int * file_count);
 static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int *shm_fd);
 static void closure(void * smap, int shm_fd, size_t size,char * shm_name, sem_t * sem, char * sem_name, struct_slave children[], size_t cant_children, FILE * output_file);
@@ -60,8 +60,11 @@ int main(int argc, char const *argv[])
     }
 
     char buffer[MAX_SIZE+1];
-    int file_count=1;
+    //int file_count=1;
     int read_count;
+
+    int index_for_tasks = 0;
+    //int pending_tasks = total_files;             // CAMBIAR EL NOMBRE
 
     int shm_fd;
 
@@ -81,7 +84,7 @@ int main(int argc, char const *argv[])
 
     int init_files_count=FILES_PER_CHILD, init_slaves_count=CANT_CHILD;
     if(CANT_CHILD*FILES_PER_CHILD>total_files){
-        init_slaves_count = total_files;
+        init_slaves_count = 1;
         init_files_count = 1;
     }
 
@@ -89,13 +92,15 @@ int main(int argc, char const *argv[])
     sleep(2); //esperar a que aparezca un proceso vista, si lo hace compartir argv
     struct_slave slaves[init_slaves_count];
 
-    initChildren(slaves, init_files_count, (char**)(argv+1), init_slaves_count, &file_count);
+    initChildren(slaves, init_files_count, (char**)(argv+1), init_slaves_count, &index_for_tasks);
 
     fd_set read_fds;
     int max_fd_read=-1;
     size_t smap_count=0;
 
-    while(processed_tasks < total_files){
+    while(processed_tasks < total_files){ 
+        fprintf(stderr, "PROCESSED: %d\n",processed_tasks);
+
         FD_ZERO(&read_fds);
 
         for(int i=0 ; i<init_slaves_count ; i++) {
@@ -117,6 +122,7 @@ int main(int argc, char const *argv[])
                     ERROR_HANDLER("Error in read function\n");   
                 }
                 if(read_count!=0){
+                    fprintf(stderr,"llegue hasta aca!!!! :D\n");
                     buffer[read_count]=0;
                 
                     int cant_task=0;
@@ -131,18 +137,18 @@ int main(int argc, char const *argv[])
                     sendInfo(buffer, output_file,smap,&smap_count,sem,cant_task);
 
                     if(slaves[i].pending_task<=0){
-                        assignTask(&(slaves[i].pending_task),slaves[i].input,argv+file_count,&file_count);
+                        assignTask(&(slaves[i].pending_task),slaves[i].input,argv+processed_tasks,&index_for_tasks);
+                        index_for_tasks++;
                     }
                 }              
             }
         }      
     }
     closure(smap, shm_fd, map_size,SHM_NAME, sem, SEM_NAME, slaves,init_slaves_count,output_file); 
-  
     return 0;
 }
 
-static void initChildren(struct_slave slaves[], int files_per_child, char *argv[], int cant_child, int *file_count){ 
+static void initChildren(struct_slave slaves[], int files_per_child, char *argv[], int cant_child, int *index){ 
     int childMaster[2],masterChild[2];
     pid_t pid;
 
@@ -180,8 +186,8 @@ static void initChildren(struct_slave slaves[], int files_per_child, char *argv[
             int j=0;
             args[j++] = "slave.out";
             for(int k=0; k<files_per_child; j++,k++){ // no está procesando uno de los archivos que mandamos, no sabemos si es el primero, el último o cual. Seguro esta aca el error
-                fprintf(stderr,"archivo: %s, %d\n",argv[(*file_count)],files_per_child);
-                args[j] = argv[(*file_count)++];
+                //fprintf(stderr,"archivo: %s, %d\n",argv[(*processed_tasks)],files_per_child);
+                args[j] = argv[(*index)++];
             }
             args[j] = NULL;
             
@@ -199,7 +205,7 @@ static void initChildren(struct_slave slaves[], int files_per_child, char *argv[
             //osea los que no use aca
         slaves[i].pending_task+=files_per_child;
         slaves[i].pid=pid;
-        (*file_count)+=files_per_child;
+        (*index)+=files_per_child;
 
         if(close(masterChild[READ])==-1){
             ERROR_HANDLER("Error closing file descriptor");
@@ -255,6 +261,9 @@ static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * sm
         if(sem_post(sem) == -1){
             ERROR_HANDLER("Error in function sem_post");
         }
+        int s = -1;
+        sem_getvalue(sem, &s);
+        fprintf(stderr, "Wait sem value solve: %d \n", s);
     }   
 
 }

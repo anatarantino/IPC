@@ -59,14 +59,15 @@ int main(int argc, char const *argv[]){
     int counter = 0;
     
     while(counter < total_files){
-        
+        fprintf(stderr,"HOLA SOY EL VISTA!!!!!!! Counter: %d, total files: %d\n",counter,total_files);
         int s = -1;
         if(sem_wait(sem) == -1){
             ERROR_HANDLER("Error in function sem_wait");
         }
+        fprintf(stderr,"PASE EL SEMAFORO!!!\n");
         char * next;
        sem_getvalue(sem, &s);
-      //  fprintf(stderr, "wait %d \n", s);  
+        fprintf(stderr, "Wait sem value vista: %d \n", s);  
         if((next=strchr(map_pointer,'\t'))==NULL){
             ERROR_HANDLER("Error in function strchr");
         }
@@ -76,7 +77,10 @@ int main(int argc, char const *argv[]){
         counter++;
         map_pointer = next; 
     }
+    fprintf(stderr,"Antes del closure - vista\n");
     closure(smap, shm_fd, total_files * MAX_SIZE, SHM_NAME, sem, SEM_NAME);
+    fprintf(stderr,"despues del closure - vista\n");
+
 }
 
 static char * initShm(const char *shm_name, int shm_oflag, mode_t mode, size_t size, int *shm_fd){
