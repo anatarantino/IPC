@@ -73,6 +73,7 @@ int main(int argc, char const *argv[]){
         map_pointer = next; 
     }
     closure(smap, shm_fd, total_files * MAX_SIZE, SHM_NAME, sem, SEM_NAME);
+    return 0;
 }
 
 static char * initShm(const char *shm_name, int shm_oflag, mode_t mode, size_t size, int *shm_fd){
