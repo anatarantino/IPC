@@ -1,108 +1,3 @@
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-ls
-minisat Archive/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_324.cnf
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-./solve ./Archive/CBS_k3_n100_m403_b10/*
-./solve /Archive/CBS_k3_n100_m403_b10/*
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-strace ./solve 
-strace ./solve Archive/CBS_k3_n100_m403_b10/*
-man SIGPIPE
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-strace ./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-strace ./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-strace ./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-strace ./solve Archive/CBS_k3_n100_m403_b10/*
-valgrind . Archive/CBS_k3_n100_m403_b10/*
-man cppcheck
-cppcheck ./solve Archive/CBS_k3_n100_m403_b10/*
-man PVS-studio
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-./solve Archive/CBS_k3_n100_m403_b10/*
-man read
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-gcc -Wall -pedantic -fsanitize=address -std=c99 slave.c -o slave
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-gcc -Wall -pedantic -fsanitize=address -std=c99 solve.c -o solve
-./solve Archive/CBS_k3_n100_m403_b10/*
-./solve Archive/jnh/*
-cd root
-apt-get install minisat
-make
-./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
-make
-./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
-make clean
-make
-./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
-cd ..
-cd dev
-ls
-cd shm
-ls
-rm sem.sem_name 
-rm shm_name 
-cd ..
-cd ..
-ls
-cd root
-make clean
-make
-./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
 ./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
 man strchr
 make clean
@@ -498,3 +393,108 @@ rm outputt.txt
 make
 ./solve.out Archive/jnh/* | ./vista.out
 exit
+cd root/
+ls
+apt-get install minisat
+./solve.out Archive/jnh/* | ./vista.out
+make clean
+make
+./solve.out Archive/jnh/* | ./vista.out
+make
+./solve.out Archive/jnh/* | ./vista.out
+make clean
+make clean
+make all
+./solve.out Archive/jnh/* | ./vista.out
+make
+./solve.out Archive/jnh/* | ./vista.out
+./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
+./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
+valgrind ./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
+valgrind -v ./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
+strace ./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
+man pvs-studio 
+apt-get install pvs-install
+man pvs-studio 
+man 7 undocumented
+man pvs-studio
+apt-get install PVS-studio
+man PVS-studio
+PVS-studio ./solve Archive/CBS_k3_n100_m403_b10/*
+make all
+./solve.out Archive/hi/* | ./vista.out
+./solve.out Archive/hi/ | ./vista.out
+./solve.out | ./vista.out
+./solve.out Archive/ | ./vista.out
+./solve.out Archive/CBS_k3_n100_m403_b10/ | ./vista.out
+make clean
+make
+./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
+make clean
+make
+./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
+make
+./solve.out Archive/CBS_k3_n100_m403_b10/* | ./vista.out
+valgrind ./solve.out Archive/CBS_k3_n100_m403_b10/*
+test
+make
+test
+test
+make test
+make test
+make
+make test
+make test
+make test
+make test
+make
+make test
+make test
+valgrind ./solve.out Archive/jnh/*
+make test
+make test
+make test
+valgrind ./solve.out Archive/jnh/*
+make test
+make test
+make test
+make test
+valgrind ./solve.out Archive/jnh/*
+echo $?
+make test
+ ./solve.out Archive/jnh/*
+echo $?
+make test
+make test
+make 
+make test
+make test
+make test
+apt-get install PVS-studio
+apt-get install cppcheck
+make test
+make test
+make test
+make clean
+cd root
+apt-get install minisat
+make
+test
+make test
+apt-get install PVS-studio
+apt-get install cppcheck
+apt-get install valgrind
+make test
+make test
+make clean
+make
+make test
+./solve.out CBS_k3_n100_m403_b10/ | ./vista.out
+make test
+./solve.out CBS_k3_n100_m403_b10/ | ./vista.out
+./solve.out CBS_k3_n100_m403_b10/* | ./vista.out
+make test
+make clean
+make
+./solve.out CBS_k3_n100_m403_b10/* | ./vista.out
+make test

@@ -17,19 +17,21 @@ Instalaciones necesarias:
         apt-get install pvs-studio
         apt-get install cppcheck
         apt-get install valgrind
+    Por último, para los permisos:
+        pvs-studio-analyzer credentials "PVS-Studio Free" "FREE-FREE-FREE-FREE"
 
 
-Compilacion:
+Compilación:
 
     Para compilar, basta con ejecutar:
         make  
-    O tambien:
+    O también:
         make all
     Esto creará tres archivos ejecutables: solve.out, vista.out y slave.out. Para eliminarlos ejecute make clean dentro del mismo directorio donde fueron creados.
 
-Ejecucion:
+Ejecución:
 
-    Para la ejecuciónm es necesario contar con archivos de extensión .cnf que recibirá el programa solve.
+    Para la ejecución es necesario contar con archivos de extensión .cnf que recibirá el programa solve.
     Para esto utilice el comando:
         ./solve.out files/*
     El programa enviará por salida estándar la cantidad de tareas a procesar. Este valor es utilizado por el programa vista. 
