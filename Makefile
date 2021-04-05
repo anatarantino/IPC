@@ -1,12 +1,10 @@
 CC = gcc
 CFLAGS = -Wall -pedantic -g -fsanitize=address -std=c99
 CLIBS = -pthread -lrt 
-RM = rm -f
+RM = rm -rf
 
 SOURCES = $(wildcard *.c)
 BINS = $(SOURCES:.c=.out)
-
-CPPANS = $(SOURCES:.c=.cppout)	
 
 TESTF = CBS_k3_n100_m403_b10/*
 
@@ -19,12 +17,12 @@ clean: clean_test
 	$(RM) $(BINS)
 
 clean_test:
-	$(RM) $(CPPANS) *.valout report.tasks
+	$(RM) report.tasks PVS-Studio.log strace_out cppoutput.txt *.valgrind
 
 test: clean
 	pvs-studio-analyzer trace -- make  > /dev/null
 	pvs-studio-analyzer analyze > /dev/null 2> /dev/null
 	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o report.tasks PVS-Studio.log  > /dev/null
-	valgrind --leak-check=full -v ./solve.out $(TESTF)  2> solve.out.valgrind; valgrind --leak-check=full -v ./vista.out  2> vista.out.valgrind; cppcheck --quiet --enable=all --force --inconclusive . 2> cppoutput.txt
+	valgrind --leak-check=full -v ./solve.out $(TESTF)  2> solveout.valgrind; valgrind --leak-check=full -v ./vista.out  2> vistaout.valgrind; cppcheck --quiet --enable=all --force --inconclusive . 2> cppoutput.txt
 
 .PHONY: all clean test clean_test

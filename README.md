@@ -52,9 +52,9 @@ Testeos:
     Luego, para realizar los testeos puede utilizar el siguiente comando:
         make test
     Los resultados se encontrarán en los siguientes archivos:
-        - PVS-Studio: ...
-        - Cppcheck: ...
-        - Valgrind: ...
+        - PVS-Studio: report.tasks
+        - Cppcheck: cppoutput.txt
+        - Valgrind: vistaout.valgrind, solveout.valgrind
     Para eliminar estos archivos ejecute el siguiente comando en el directorio donde el comando test fue ejecutado:
         make clean_test 
     
