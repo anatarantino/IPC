@@ -8,7 +8,7 @@ BINS = $(SOURCES:.c=.out)
 
 CPPANS = $(SOURCES:.c=.cppout)	
 
-TESTF = Archive/jnh/*
+TESTF = CBS_k3_n100_m403_b10/*
 
 all: $(BINS)
 
@@ -21,10 +21,10 @@ clean: clean_test
 clean_test:
 	$(RM) $(CPPANS) *.valout report.tasks
 
-test: clean $(CPPANS)
-	valgrind ./solve.out $(TESTF) 2> master.valout| valgrind ./vista.out 2> view.valout > /dev/null; echo ""
-
-%.cppout: %.c
-	cppcheck --quiet --enable=all --force --inconclusive  $^ 2> $@
+test: clean
+	pvs-studio-analyzer trace -- make  > /dev/null
+	pvs-studio-analyzer analyze > /dev/null 2> /dev/null
+	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o report.tasks PVS-Studio.log  > /dev/null
+	valgrind --leak-check=full -v ./solve.out $(TESTF)  2> solve.out.valgrind; valgrind --leak-check=full -v ./vista.out  2> vista.out.valgrind; cppcheck --quiet --enable=all --force --inconclusive . 2> cppoutput.txt
 
 .PHONY: all clean test clean_test
