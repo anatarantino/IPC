@@ -44,7 +44,7 @@ int main(int argc, char const *argv[])
 }
 
 static void processFile(char * file){
-    char buffer[MAX_SIZE];
+    char buffer[MAX_SIZE+1];
     
     if(sprintf(buffer, "minisat %s | grep -o -e \"Number of.*[0 - 9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"",file)<0){
         ERROR_HANDLER("Error in function sprintf - slave\n");
@@ -56,7 +56,7 @@ static void processFile(char * file){
         ERROR_HANDLER("Error in function popen - slave\n");
     }
 
-    int dim=fread(buffer,sizeof(char),MAX_SIZE,output);
+    size_t dim=fread(buffer,sizeof(char),MAX_SIZE,output);
 
     buffer[dim]=0;
 

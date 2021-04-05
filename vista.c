@@ -30,8 +30,8 @@ int main(int argc, char const *argv[]){
     int total_files;
     
     if(argc <= 1){
-        char stdin_buffer[MAX_LEN];
-        size_t count = 0;
+        char stdin_buffer[MAX_LEN+1];
+        ssize_t count = 0;
         if((count=read(STDIN_FILENO, stdin_buffer, MAX_LEN)) == -1){
             ERROR_HANDLER("Error in function read - vista\n");
         }

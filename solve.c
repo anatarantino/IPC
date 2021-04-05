@@ -238,14 +238,14 @@ static void * initShm(const char *name, int oflag, mode_t mode, size_t size, int
 }
 
 static void sendInfo(char * buffer, FILE * output_file, char * smap, size_t * smap_count, sem_t * sem, int cant_task){
-    if(fwrite(buffer, strlen(buffer), sizeof(char), output_file) == 0){
+    size_t size = strlen(buffer);
+
+    if(fwrite(buffer, size, sizeof(char), output_file) == 0){
         ERROR_HANDLER("Error in function fwrite - solve\n");
     }
 
-    size_t size = strlen(buffer);
     memcpy(smap + *smap_count,buffer,size);
     (*smap_count)+=size;
-
 
     for (size_t i = 0; i<cant_task ; i++){
         if(sem_post(sem) == -1){
